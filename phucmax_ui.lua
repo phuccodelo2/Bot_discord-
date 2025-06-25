@@ -46,10 +46,10 @@ rainbowStroke(logo)
 
 -- 🪟 Menu chính
 local main = Instance.new("Frame", gui)
-main.Size = UDim2.new(0, 640, 0, 420)
+main.Size = UDim2.new(0, 300, 0, 250)
 main.Position = UDim2.new(0.5, -320, 0.5, -210)
 main.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-main.BackgroundTransparency = 0.2 -- trong suốt nhẹ
+main.BackgroundTransparency = 1 -- trong suốt nhẹ
 main.Visible = true
 main.Active = true
 main.Draggable = true
