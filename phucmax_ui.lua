@@ -122,7 +122,7 @@ for i, name in ipairs(tabNames) do
 	local page = Instance.new("Frame", main)
 	page.Size = UDim2.new(1, -20, 1, -60)
 	page.Position = UDim2.new(0, 10, 0, 55)
-	page.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+	page.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 	page.Visible = (i == 1)
 	Instance.new("UICorner", page).CornerRadius = UDim.new(0, 8)
 	tabPages[name] = page
@@ -131,11 +131,11 @@ for i, name in ipairs(tabNames) do
 	local runBtn = Instance.new("TextButton", scroll)
 	runBtn.Size = UDim2.new(1, -20, 0, 44)
 	runBtn.Position = UDim2.new(0, 10, 0, 10)
-	runBtn.BackgroundColor3 = Color3.fromRGB(60, 120, 80)
+	runBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 	runBtn.TextColor3 = Color3.new(1, 1, 1)
 	runBtn.Font = Enum.Font.GothamBold
 	runBtn.TextSize = 16
-	runBtn.Text = "▶️ CHẠY SCRIPT"
+	runBtn.Text = " CHẠY SCRIPT"
 	Instance.new("UICorner", runBtn).CornerRadius = UDim.new(0, 8)
 
 	runBtn.MouseButton1Click:Connect(function()
