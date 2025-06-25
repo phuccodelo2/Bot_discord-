@@ -12,12 +12,11 @@ local function rainbowStroke(target)
 	grad.Rotation = 0
 	grad.Color = ColorSequence.new({
 		ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 0, 0)),
-		ColorSequenceKeypoint.new(0.16, Color3.fromRGB(255, 255, 0)),
-		ColorSequenceKeypoint.new(0.33, Color3.fromRGB(0, 255, 0)),
-		ColorSequenceKeypoint.new(0.5, Color3.fromRGB(0, 255, 255)),
-		ColorSequenceKeypoint.new(0.66, Color3.fromRGB(0, 0, 255)),
-		ColorSequenceKeypoint.new(0.83, Color3.fromRGB(255, 0, 255)),
-		ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 0, 0)),
+		ColorSequenceKeypoint.new(0.2, Color3.fromRGB(255, 255, 0)),
+		ColorSequenceKeypoint.new(0.4, Color3.fromRGB(0, 255, 0)),
+		ColorSequenceKeypoint.new(0.6, Color3.fromRGB(0, 255, 255)),
+		ColorSequenceKeypoint.new(0.8, Color3.fromRGB(0, 0, 255)),
+		ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 0, 255)),
 	})
 	coroutine.wrap(function()
 		while grad and grad.Parent do
@@ -27,12 +26,12 @@ local function rainbowStroke(target)
 	end)()
 end
 
--- 📜 Main GUI
+-- GUI
 local gui = Instance.new("ScreenGui", CoreGui)
-gui.Name = "PhucMaxRainbowUI"
+gui.Name = "PhucMaxCompactUI"
 gui.ResetOnSpawn = false
 
--- 🔲 Nút bật/tắt menu (logo), viền chạy vòng, kéo được
+-- Logo bật menu
 local logo = Instance.new("ImageButton", gui)
 logo.Size = UDim2.new(0, 60, 0, 60)
 logo.Position = UDim2.new(0, 10, 0.35, 0)
@@ -44,12 +43,11 @@ logo.Active = true
 logo.Draggable = true
 rainbowStroke(logo)
 
--- 🪟 Menu chính
+-- Main Menu (gọn hơn, không trong suốt)
 local main = Instance.new("Frame", gui)
-main.Size = UDim2.new(0, 450, 0, 370)
-main.Position = UDim2.new(0.5, -320, 0.5, -210)
+main.Size = UDim2.new(0, 500, 0, 360) -- Nhỏ hơn
+main.Position = UDim2.new(0.5, -250, 0.5, -180)
 main.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-main.BackgroundTransparency = 0.9 -- trong suốt nhẹ
 main.Visible = true
 main.Active = true
 main.Draggable = true
@@ -60,7 +58,7 @@ logo.MouseButton1Click:Connect(function()
 	main.Visible = not main.Visible
 end)
 
--- 🧭 Tab scroll kéo ngang thật
+-- Tab bar (đen đậm, không trong suốt)
 local tabFrame = Instance.new("Frame", main)
 tabFrame.Size = UDim2.new(1, 0, 0, 50)
 tabFrame.Position = UDim2.new(0, 0, 0, 0)
@@ -69,24 +67,23 @@ Instance.new("UICorner", tabFrame).CornerRadius = UDim.new(0, 6)
 
 local tabScroll = Instance.new("ScrollingFrame", tabFrame)
 tabScroll.Size = UDim2.new(1, 0, 1, 0)
-tabScroll.CanvasSize = UDim2.new(0, 900, 0, 0)
-tabScroll.ScrollingDirection = Enum.ScrollingDirection.X
+tabScroll.CanvasSize = UDim2.new(0, 700, 0, 0)
 tabScroll.ScrollBarThickness = 2
 tabScroll.BackgroundTransparency = 1
-tabScroll.Name = "TabScroll"
+tabScroll.ScrollingDirection = Enum.ScrollingDirection.X
 
--- 📄 Tab và Trang
+-- Tabs
 local tabNames = {"General", "Farm", "Items", "Combat"}
 local tabPages = {}
 
 for i, name in ipairs(tabNames) do
 	local btn = Instance.new("TextButton", tabScroll)
-	btn.Size = UDim2.new(0, 160, 0, 40)
-	btn.Position = UDim2.new(0, (i - 1) * 165 + 10, 0, 5)
+	btn.Size = UDim2.new(0, 120, 0, 38)
+	btn.Position = UDim2.new(0, (i - 1) * 125 + 10, 0, 6)
 	btn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 	btn.TextColor3 = Color3.fromRGB(255, 255, 255)
 	btn.Font = Enum.Font.GothamBold
-	btn.TextSize = 8
+	btn.TextSize = 14
 	btn.Text = name
 	Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 6)
 
@@ -101,7 +98,6 @@ for i, name in ipairs(tabNames) do
 	page.Size = UDim2.new(1, -20, 1, -60)
 	page.Position = UDim2.new(0, 10, 0, 55)
 	page.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-	page.BackgroundTransparency = 0.25
 	page.Visible = (i == 1)
 	Instance.new("UICorner", page).CornerRadius = UDim.new(0, 8)
 	tabPages[name] = page
@@ -112,7 +108,7 @@ for i, name in ipairs(tabNames) do
 	end)
 end
 
--- 📦 Scroll 1 cột
+-- Scroll 1 cột đen
 local function createScroll(parent)
 	local frame = Instance.new("Frame", parent)
 	frame.Size = UDim2.new(1, -20, 1, -20)
@@ -132,10 +128,10 @@ local function createScroll(parent)
 	return scroll
 end
 
--- ✅ Toggle chuẩn animation
+-- Nút bật tắt
 local function createToggle(text, parent, y)
 	local t = Instance.new("TextButton", parent)
-	t.Size = UDim2.new(1, -20, 0, 40)
+	t.Size = UDim2.new(1, -20, 0, 38)
 	t.Position = UDim2.new(0, 10, 0, y)
 	t.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
 	t.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -160,7 +156,7 @@ local function createToggle(text, parent, y)
 	end)
 end
 
--- 🔧 Tab General nội dung
+-- Tab General nội dung
 local genScroll = createScroll(tabPages["General"])
 local features = {"Auto Farm", "Boss Farm", "Auto Haki", "Fast Attack", "Bypass TP", "Hide Damage", "Skill Spam Z/X"}
 for i, v in ipairs(features) do
