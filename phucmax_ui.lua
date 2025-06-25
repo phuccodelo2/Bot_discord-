@@ -3,48 +3,51 @@ local UIS = game:GetService("UserInputService")
 local TS = game:GetService("TweenService")
 local CoreGui = game:GetService("CoreGui")
 
--- Rainbow viền
+-- Hiệu ứng viền bảy màu
 local function rainbow(uiframe)
-	local gradient = Instance.new("UIGradient", uiframe)
-	gradient.Rotation = 0
-	gradient.Color = ColorSequence.new({
+	local border = Instance.new("UIStroke", uiframe)
+	border.Thickness = 2
+	local g = Instance.new("UIGradient", border)
+	g.Color = ColorSequence.new({
 		ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 0, 0)),
-		ColorSequenceKeypoint.new(0.17, Color3.fromRGB(255, 255, 0)),
-		ColorSequenceKeypoint.new(0.33, Color3.fromRGB(0, 255, 0)),
-		ColorSequenceKeypoint.new(0.5, Color3.fromRGB(0, 255, 255)),
-		ColorSequenceKeypoint.new(0.67, Color3.fromRGB(0, 0, 255)),
-		ColorSequenceKeypoint.new(0.83, Color3.fromRGB(255, 0, 255)),
-		ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 0, 0)),
+		ColorSequenceKeypoint.new(0.2, Color3.fromRGB(255, 255, 0)),
+		ColorSequenceKeypoint.new(0.4, Color3.fromRGB(0, 255, 0)),
+		ColorSequenceKeypoint.new(0.6, Color3.fromRGB(0, 255, 255)),
+		ColorSequenceKeypoint.new(0.8, Color3.fromRGB(0, 0, 255)),
+		ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 0, 255)),
 	})
 	task.spawn(function()
-		while gradient do
-			gradient.Rotation = (gradient.Rotation + 1) % 360
+		while g do
+			g.Rotation = (g.Rotation + 1) % 360
 			wait(0.02)
 		end
 	end)
 end
 
--- Main GUI
+-- GUI
 local gui = Instance.new("ScreenGui", CoreGui)
-gui.Name = "PhucMaxUIProMax"
+gui.Name = "PhucMaxSuperUI"
 gui.ResetOnSpawn = false
 
--- Logo vuông bật menu
+-- Logo vuông, bo góc, kéo được, có viền bảy màu
 local logo = Instance.new("ImageButton", gui)
 logo.Size = UDim2.new(0, 60, 0, 60)
 logo.Position = UDim2.new(0, 10, 0.35, 0)
 logo.Image = "rbxassetid://139344694264003"
 logo.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 logo.BorderSizePixel = 0
-local logoBorder = Instance.new("UICorner", logo)
-logoBorder.CornerRadius = UDim.new(0, 12)
+logo.AutoButtonColor = true
+Instance.new("UICorner", logo).CornerRadius = UDim.new(0, 12)
 rainbow(logo)
+logo.Active = true
+logo.Draggable = true
 
--- Main UI
+-- Main menu - nền mờ, viền bảy màu
 local main = Instance.new("Frame", gui)
 main.Size = UDim2.new(0, 640, 0, 420)
 main.Position = UDim2.new(0.5, -320, 0.5, -210)
 main.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+main.BackgroundTransparency = 0.15
 main.Visible = true
 main.Active = true
 main.Draggable = true
@@ -55,7 +58,7 @@ logo.MouseButton1Click:Connect(function()
 	main.Visible = not main.Visible
 end)
 
--- Tab container có scroll ngang
+-- Tab bar container
 local tabFrame = Instance.new("Frame", main)
 tabFrame.Size = UDim2.new(1, 0, 0, 50)
 tabFrame.Position = UDim2.new(0, 0, 0, 0)
@@ -64,7 +67,7 @@ Instance.new("UICorner", tabFrame).CornerRadius = UDim.new(0, 6)
 
 local tabScroll = Instance.new("ScrollingFrame", tabFrame)
 tabScroll.Size = UDim2.new(1, 0, 1, 0)
-tabScroll.CanvasSize = UDim2.new(0, 700, 0, 0)
+tabScroll.CanvasSize = UDim2.new(0, 640, 0, 0)
 tabScroll.ScrollBarThickness = 2
 tabScroll.BackgroundTransparency = 1
 tabScroll.ScrollingDirection = Enum.ScrollingDirection.X
@@ -85,7 +88,7 @@ for i, name in ipairs(tabNames) do
 	tabBtn.AutoButtonColor = false
 	Instance.new("UICorner", tabBtn).CornerRadius = UDim.new(0, 6)
 
-	-- Hover effect
+	-- Hover hiệu ứng
 	local function tweenColor(btn, to)
 		TS:Create(btn, TweenInfo.new(0.2), {BackgroundColor3 = to}):Play()
 	end
@@ -96,6 +99,7 @@ for i, name in ipairs(tabNames) do
 	page.Size = UDim2.new(1, -20, 1, -60)
 	page.Position = UDim2.new(0, 10, 0, 55)
 	page.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+	page.BackgroundTransparency = 0.2
 	page.Visible = (i == 1)
 	Instance.new("UICorner", page).CornerRadius = UDim.new(0, 8)
 	tabPages[name] = page
@@ -106,7 +110,7 @@ for i, name in ipairs(tabNames) do
 	end)
 end
 
--- Chỉ còn 1 bên chức năng
+-- Tạo nội dung scroll 1 bên
 local function createScroll(parent)
 	local col = Instance.new("Frame", parent)
 	col.Size = UDim2.new(1, -20, 1, -20)
@@ -126,7 +130,7 @@ local function createScroll(parent)
 	return scroll
 end
 
--- Toggle animation
+-- Toggle có animation hover
 local function createToggle(text, parent, y)
 	local t = Instance.new("TextButton", parent)
 	t.Size = UDim2.new(1, -20, 0, 38)
@@ -146,7 +150,6 @@ local function createToggle(text, parent, y)
 		t.Text = (on and "   ✅ " or "   ❌ ") .. text
 	end)
 
-	-- Hover effect
 	t.MouseEnter:Connect(function()
 		TS:Create(t, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(80, 80, 80)}):Play()
 	end)
@@ -155,10 +158,9 @@ local function createToggle(text, parent, y)
 	end)
 end
 
--- Tab General nội dung
+-- Nội dung Tab General
 local genScroll = createScroll(tabPages["General"])
 local features = {"Auto Farm Level", "Boss Farm", "Auto Haki", "Fast Attack", "Bypass TP", "Hide Damage", "Skill Spam Z/X"}
-
 for i, v in ipairs(features) do
 	createToggle(v, genScroll, (i - 1) * 45)
 end
