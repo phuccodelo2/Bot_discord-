@@ -86,7 +86,7 @@ for i, name in ipairs(tabNames) do
 	btn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 	btn.TextColor3 = Color3.fromRGB(255, 255, 255)
 	btn.Font = Enum.Font.GothamBold
-	btn.TextSize = 14
+	btn.TextSize = 8
 	btn.Text = name
 	Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 6)
 
