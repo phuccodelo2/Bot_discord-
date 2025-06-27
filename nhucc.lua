@@ -133,9 +133,9 @@ local function createButton(name, callback)
 end
 
 -- 🧩 Add buttons
-createButton("Bay lên trời 200m", function(on) if on then goUp() end end)
-createButton("Rơi xuống đất", function(on) if on then dropDown() end end)
-createButton("Nhảy cao x5 + vô hạn + rơi chậm", function(on)
+createButton("bay lên chạy", function(on) if on then goUp() end end)
+createButton("Rơi xuống ", function(on) if on then dropDown() end end)
+createButton("Nhảy vô hạn ", function(on)
     local hum = char:FindFirstChildOfClass("Humanoid")
     if hum then
         hum.JumpPower = on and 250 or 50
