@@ -55,8 +55,8 @@ end
 local function goUp()
     local door = getNearestDoor()
     if door then
-        TweenService:Create(root, TweenInfo.new(1.2), {CFrame = CFrame.new(door)}):Play()
-        wait(1.3)
+        TweenService:Create(root, TweenInfo.new(0.7), {CFrame = CFrame.new(door)}):Play()
+        wait(1)
         root.CFrame = root.CFrame + Vector3.new(0, 200, 0)
         StarterGui:SetCore("ChatMakeSystemMessage", {
             Text = "[PhucMax ☁️] Bay lên 200m!",
