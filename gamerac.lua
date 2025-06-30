@@ -44,13 +44,10 @@ function goUp(onDone)
 		onDone()
 	end
 end
-createButton("Rớt xuống", function(on)
-	if on then
-		local hrp = game.Players.LocalPlayer.Character:WaitForChild("HumanoidRootPart")
-		hrp.CFrame = hrp.CFrame - Vector3.new(0, 50, 0)
+if root then
+		root.CFrame = root.CFrame - Vector3.new(0, 50, 0)
 	end
-end)
--- Hàm rơi xuống đến Y = 50
+end
 
 
 local gui = Instance.new("ScreenGui", game.CoreGui)
