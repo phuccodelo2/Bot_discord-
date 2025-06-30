@@ -170,7 +170,23 @@ task.spawn(function()
 	end
 end)
 
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local lp = Players.LocalPlayer
 
+RunService.Stepped:Connect(function()
+	local char = lp.Character
+	if not char then return end
+
+	for _, v in ipairs(char:GetDescendants()) do
+		if v:IsA("BoolValue") or v:IsA("StringValue") or v:IsA("IntValue") or v:IsA("ObjectValue") then
+			local name = v.Name:lower()
+			if name:find("stun") or name:find("ragdoll") or name:find("knock") or name:find("slow") then
+				v:Destroy()
+			end
+		end
+	end
+end)
 
 -- Giao diện
 local gui = Instance.new("ScreenGui", game.CoreGui)
