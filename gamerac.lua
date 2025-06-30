@@ -108,58 +108,98 @@ function setInfiniteJump(state)
 		end
 	end
 end
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local localPlayer = Players.LocalPlayer
 
-local flying = false
-local flyConnection
+-- Xóa toàn bộ ESP cũ
+local function clearESP()
+	for _, obj in pairs(workspace:GetDescendants()) do
+		if obj:IsA("BillboardGui") and obj.Name == "PlayerESP" then
+			obj:Destroy()
+		end
+	end
+end
 
-function startFlying()
-	local player = game.Players.LocalPlayer
-	local char = player.Character or player.CharacterAdded:Wait()
-	local hrp = char:WaitForChild("HumanoidRootPart")
-	local hum = char:FindFirstChildOfClass("Humanoid")
+-- Tạo ESP cho 1 player
+local function createESP(player)
+	if player == localPlayer then return end
+	local char = player.Character
+	if not char or not char:FindFirstChild("Head") then return end
 
-	if not hum or not hrp then return end
+	-- Kiểm tra trùng
+	if char.Head:FindFirstChild("PlayerESP") then return end
 
-	local speed = 50
-	local UIS = game:GetService("UserInputService")
-	local RS = game:GetService("RunService")
-	local moveVec = Vector3.zero
+	local esp = Instance.new("BillboardGui", char.Head)
+	esp.Name = "PlayerESP"
+	esp.Size = UDim2.new(0, 100, 0, 30)
+	esp.Adornee = char.Head
+	esp.AlwaysOnTop = true
+	esp.StudsOffset = Vector3.new(0, 2.5, 0)
 
-	flyConnection = RS.RenderStepped:Connect(function()
-		if not flying or not hrp or not hum then return end
+	local text = Instance.new("TextLabel", esp)
+	text.Size = UDim2.new(1, 0, 1, 0)
+	text.BackgroundTransparency = 1
+	text.Text = player.Name
+	text.TextColor3 = Color3.fromRGB(0, 255, 0)
+	text.Font = Enum.Font.FredokaOne
+	text.TextScaled = true
+end
 
-		-- Lấy hướng di chuyển
-		moveVec = Vector3.zero
-		if UIS:IsKeyDown(Enum.KeyCode.W) then moveVec = moveVec + workspace.CurrentCamera.CFrame.LookVector end
-		if UIS:IsKeyDown(Enum.KeyCode.S) then moveVec = moveVec - workspace.CurrentCamera.CFrame.LookVector end
-		if UIS:IsKeyDown(Enum.KeyCode.A) then moveVec = moveVec - workspace.CurrentCamera.CFrame.RightVector end
-		if UIS:IsKeyDown(Enum.KeyCode.D) then moveVec = moveVec + workspace.CurrentCamera.CFrame.RightVector end
+-- Cập nhật toàn bộ ESP
+local function updateESP()
+	clearESP()
+	for _, player in ipairs(Players:GetPlayers()) do
+		createESP(player)
+	end
+end
 
-		moveVec = Vector3.new(moveVec.X, 1, moveVec.Z).Unit -- luôn bay lên
-		hrp.Velocity = moveVec * speed
+-- Lắng nghe sự kiện người chơi mới vào / character được load lại
+Players.PlayerAdded:Connect(function(p)
+	p.CharacterAdded:Connect(function()
+		wait(1)
+		updateESP()
 	end)
-end
+end)
 
-function stopFlying()
-	if flyConnection then
-		flyConnection:Disconnect()
-		flyConnection = nil
+-- Update liên tục mỗi 2 giây
+task.spawn(function()
+	while true do
+		updateESP()
+		task.wait(1)
+	end
+end)
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local lp = Players.LocalPlayer
+
+local function removeStunEffects()
+	local character = lp.Character
+	if not character then return end
+
+	-- Xóa các giá trị stun thường dùng
+	for _, v in ipairs(character:GetDescendants()) do
+		if v:IsA("BoolValue") or v:IsA("StringValue") or v:IsA("IntValue") or v:IsA("ObjectValue") then
+			local lowerName = v.Name:lower()
+			if lowerName:find("stun") or lowerName:find("ragdoll") or lowerName:find("knock") or lowerName:find("slow") then
+				v:Destroy()
+			end
+		end
 	end
 
-	local char = game.Players.LocalPlayer.Character
-	if char and char:FindFirstChild("HumanoidRootPart") then
-		char.HumanoidRootPart.Velocity = Vector3.new(0, -50, 0) -- rớt xuống
+	-- Reset velocity để không bị văng
+	local hrp = character:FindFirstChild("HumanoidRootPart")
+	if hrp then
+		hrp.Velocity = Vector3.zero
+		hrp.RotVelocity = Vector3.zero
 	end
 end
 
-function toggleFly(state)
-	flying = state
-	if flying then
-		startFlying()
-	else
-		stopFlying()
-	end
-end
+-- Lặp liên tục mỗi 0.3s để đảm bảo không bị stun/văng
+RunService.RenderStepped:Connect(function()
+	pcall(removeStunEffects)
+end)
 
 -- Giao diện
 local gui = Instance.new("ScreenGui", game.CoreGui)
@@ -265,9 +305,26 @@ end)
 createButton("Nhảy vô hạn", function(on)
 	setInfiniteJump(on)
 end)
+createButton("ESP Player", function(on)
+	if on then
+		updateESP()
+	else
+		clearESP()
+	end
+end)
+local antiStunRunning = false
+local connection
 
-createButton("Bay Tự Do", function(on)
-	toggleFly(on)
+createButton("Anti Stun/Văng", function(on)
+	if on and not antiStunRunning then
+		antiStunRunning = true
+		connection = RunService.RenderStepped:Connect(function()
+			pcall(removeStunEffects)
+		end)
+	elseif not on and antiStunRunning and connection then
+		connection:Disconnect()
+		antiStunRunning = false
+	end
 end)
 
 local function showNotification(msg)
