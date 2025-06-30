@@ -49,6 +49,43 @@ function goDown()
 	end
 end
 
+local godModeEnabled = false
+local godLoop
+
+function setGodMode(state)
+	godModeEnabled = state
+
+	if godModeEnabled then
+		local char = game.Players.LocalPlayer.Character
+		local hum = char and char:FindFirstChildOfClass("Humanoid")
+
+		if hum then
+			hum.Health = hum.MaxHealth
+		end
+
+		-- Lặp để giữ máu đầy
+		godLoop = task.spawn(function()
+			while godModeEnabled do
+				local char = game.Players.LocalPlayer.Character
+				local hum = char and char:FindFirstChildOfClass("Humanoid")
+				if hum then
+					hum.Health = hum.MaxHealth
+					hum:GetPropertyChangedSignal("Health"):Connect(function()
+						if hum.Health < hum.MaxHealth then
+							hum.Health = hum.MaxHealth
+						end
+					end)
+				end
+				task.wait(0.2)
+			end
+		end)
+	else
+		if godLoop then
+			task.cancel(godLoop)
+		end
+	end
+end
+
 -- Giao diện
 local gui = Instance.new("ScreenGui", game.CoreGui)
 gui.Name = "PhucmaxUI"
@@ -144,6 +181,10 @@ createButton("Rớt xuống", function(on)
 	if on then
 		goDown()
 	end
+end)
+
+createButton("Bất tử", function(on)
+	setGodMode(on)
 end)
 
 local function showNotification(msg)
