@@ -46,17 +46,6 @@ function goUp(onDone)
 end
 
 -- Hàm rơi xuống đến Y = 50
-function goDown()
-	local hrp = game.Players.LocalPlayer.Character:WaitForChild("HumanoidRootPart")
-	local targetY = 50
-	local fallSpeed = 3
-
-	-- Rơi từ từ
-	while hrp.Position.Y > targetY do
-		hrp.CFrame = hrp.CFrame - Vector3.new(0, fallSpeed, 0)
-		task.wait(0.02)
-	end
-end
 
 
 local gui = Instance.new("ScreenGui", game.CoreGui)
@@ -83,7 +72,10 @@ title.TextColor3 = Color3.new(1, 1, 1)
 
 local rainbowColors = {
 	Color3.fromRGB(255, 0, 0),    
-	Color3.fromRGB(255, 127, 0), 
+	Colorif root then
+		root.CFrame = root.CFrame - Vector3.new(0, 50, 0)
+	end
+end3.fromRGB(255, 127, 0), 
 	Color3.fromRGB(255, 255, 0),  
 	Color3.fromRGB(0, 255, 0),    
 	Color3.fromRGB(0, 255, 255),  
