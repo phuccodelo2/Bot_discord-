@@ -170,7 +170,12 @@ task.spawn(function()
 	end
 end)
 
-local Players = game:GetService("Players")
+
+
+-- Giao diện
+local gui = Instance.new("ScreenGui", game.CoreGui)
+gui.Name = "PhucmaxUI"
+gui.ResetOnSplocal Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local lp = Players.LocalPlayer
 
@@ -178,33 +183,25 @@ local function removeStunEffects()
 	local character = lp.Character
 	if not character then return end
 
-	-- Xóa các giá trị stun thường dùng
 	for _, v in ipairs(character:GetDescendants()) do
 		if v:IsA("BoolValue") or v:IsA("StringValue") or v:IsA("IntValue") or v:IsA("ObjectValue") then
-			local lowerName = v.Name:lower()
-			if lowerName:find("stun") or lowerName:find("ragdoll") or lowerName:find("knock") or lowerName:find("slow") then
+			local name = v.Name:lower()
+			if name:find("stun") or name:find("ragdoll") or name:find("knock") or name:find("slow") then
 				v:Destroy()
 			end
 		end
 	end
 
-	-- Reset velocity để không bị văng
 	local hrp = character:FindFirstChild("HumanoidRootPart")
 	if hrp then
-		hrp.Velocity = Vector3.zero
-		hrp.RotVelocity = Vector3.zero
+		local speed = hrp.Velocity.Magnitude
+		-- Chỉ reset nếu tốc độ quá lớn (văng)
+		if speed > 100 then
+			hrp.Velocity = Vector3.zero
+			hrp.RotVelocity = Vector3.zero
+		end
 	end
-end
-
--- Lặp liên tục mỗi 0.3s để đảm bảo không bị stun/văng
-RunService.RenderStepped:Connect(function()
-	pcall(removeStunEffects)
-end)
-
--- Giao diện
-local gui = Instance.new("ScreenGui", game.CoreGui)
-gui.Name = "PhucmaxUI"
-gui.ResetOnSpawn = false
+endawn = false
 
 local main = Instance.new("Frame", gui)
 main.Size = UDim2.new(0, 260, 0, 270)
