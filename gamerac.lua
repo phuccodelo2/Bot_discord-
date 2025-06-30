@@ -1,84 +1,60 @@
-repeat wait() until game:IsLoaded()
+-- === CHỨC NĂNG TELEPORT BAY ĐẾN VỊ TRÍ GẦN NHẤT RỒI BAY LÊN TRỜI 200 ===
 
-local Players = game:GetService("Players")
-local TweenService = game:GetService("TweenService")
-local UserInputService = game:GetService("UserInputService")
-local player = Players.LocalPlayer
-
-local char, root
-local jumpEnabled = false
-
-local function updateChar()
-	char = player.Character or player.CharacterAdded:Wait()
-	root = char:WaitForChild("HumanoidRootPart")
-end
-
-updateChar()
-player.CharacterAdded:Connect(function()
-	wait(1)
-	updateChar()
-end)
-
-
+-- Danh sách các vị trí door
 local doorPositions = {
-	Vector3.new(-469, -7, -102), Vector3.new(-468, -7, 8), Vector3.new(-467, -7, 112),
-	Vector3.new(-466, -8, 220), Vector3.new(-355, -8, 219), Vector3.new(-354, -8, 112),
-	Vector3.new(-353, -7, 4), Vector3.new(-353, -7, -100)
+	Vector3.new(-466, -1, 220), Vector3.new(-466, -2, 116),
+	Vector3.new(-466, -2, 8), Vector3.new(-464, -2, -102),
+	Vector3.new(-351, -2, -100), Vector3.new(-354, -2, 5),
+	Vector3.new(-354, -2, 115), Vector3.new(-358, -2, 223)
 }
 
-local function getNearestDoor()
+-- Hàm tìm vị trí gần nhất
+local function getClosestDoor()
+	local hrp = game.Players.LocalPlayer.Character:WaitForChild("HumanoidRootPart")
 	local closest, minDist = nil, math.huge
-	for _, door in ipairs(doorPositions) do
-		local dist = (root.Position - door).Magnitude
+	for _, pos in ipairs(doorPositions) do
+		local dist = (hrp.Position - pos).Magnitude
 		if dist < minDist then
 			minDist = dist
-			closest = door
+			closest = pos
 		end
 	end
 	return closest
 end
 
+-- Hàm bay đến vị trí gần nhất và teleport lên trời
+function goUp(onDone)
+	local target = getClosestDoor()
+	if not target then return end
 
-local function goUp()
-	local door = getNearestDoor()
-	if door then
-		TweenService:Create(root, TweenInfo.new(1.2), {CFrame = CFrame.new(door)}):Play()
-		wait(1.3)
-		root.CFrame = root.CFrame + Vector3.new(0, 200, 0)
+	local hrp = game.Players.LocalPlayer.Character:WaitForChild("HumanoidRootPart")
+	local speed = 80-- tốc độ bay
+
+	while (hrp.Position - target).Magnitude > 5 do
+		local direction = (target - hrp.Position).Unit
+		hrp.CFrame = hrp.CFrame + direction * (speed / 60)
+		task.wait(1/60)
+	end
+
+	-- Khi đến gần, bay lên trời 200
+	hrp.CFrame = hrp.CFrame + Vector3.new(0, 200, 0)
+
+	-- Gọi hàm tắt nút sau khi xong
+	if onDone then
+		onDone()
 	end
 end
 
-local function dropDown()
-	if root then
-		root.CFrame = root.CFrame - Vector3.new(0, 50, 0)
-	end
-end
+-- Hàm rơi xuống đến Y = 50
+function goDown()
+	local hrp = game.Players.LocalPlayer.Character:WaitForChild("HumanoidRootPart")
+	local targetY = 50
+	local fallSpeed = 3
 
-UserInputService.JumpRequest:Connect(function()
-	if jumpEnabled and char and char:FindFirstChildOfClass("Humanoid") then
-		char:FindFirstChildOfClass("Humanoid"):ChangeState("Jumping")
-	end
-end)
-
-local godConnection = nil
-
-function setGodMode(on)
-	local hum = char and char:FindFirstChildOfClass("Humanoid")
-	if not hum then return end
-
-	if on then
-		hum.MaxHealth = math.huge
-		hum.Health = math.huge
-		if godConnection then godConnection:Disconnect() end
-		godConnection = hum:GetPropertyChangedSignal("Health"):Connect(function()
-			if hum.Health < math.huge then
-				hum.Health = math.huge
-			end
-		end)
-	else
-		if godConnection then godConnection:Disconnect() end
-		hum.MaxHealth = 100
-		hum.Health = 100
+	-- Rơi từ từ
+	while hrp.Position.Y > targetY do
+		hrp.CFrame = hrp.CFrame - Vector3.new(0, fallSpeed, 0)
+		task.wait(0.02)
 	end
 end
 
@@ -132,7 +108,7 @@ local logo = Instance.new("ImageButton")
 logo.Name = "ToggleButton"
 logo.Parent = gui
 logo.Size = UDim2.new(0, 50, 0, 50)
-logo.Position = UDim2.new(0, 15, 1, -65) 
+logo.Position = UDim2.new(0, 10, 0.5, -25)
 logo.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 logo.Image = "rbxassetid://113632547593752"
 logo.Draggable = true
@@ -167,28 +143,20 @@ local function createButton(text, callback)
 end
 
 
-createButton("tele lên cao", function(on) if on then goUp() end end)
-createButton("Rơi xuống", function(on) if on then dropDown() end end)
-createButton("Nhảy vô hạn", function(on)
-	local hum = char and char:FindFirstChildOfClass("Humanoid")
-	if hum then hum.JumpPower = on and 250 or 50 end
-	jumpEnabled = on
+createButton("Teleport to Sky", function(on)
+	if on then
+		goUp(function()
+			on = false -- tắt flag
+		end)
+	end
 end)
-createButton("Bất tử", function(on)
-	setGodMode(on)
-end)
-
-
-local sound = Instance.new("Sound", gui)
-sound.SoundId = "rbxassetid://120471255813363" 
-sound.Volume = 1
-sound:Play()
+createButton("Fall Down", function(on) if on then goDown() end end)
 
 local function showNotification(msg)
 	local notify = Instance.new("TextLabel")
 	notify.Parent = gui
 	notify.Size = UDim2.new(0, 300, 0, 40)
-	notify.Position = UDim2.new(0.5, -150, 0.1, 0)
+	notify.Position = UDim2.new(1, -310, 1, -60)
 	notify.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 	notify.TextColor3 = Color3.fromRGB(255, 255, 255)
 	notify.Font = Enum.Font.GothamBold
