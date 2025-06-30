@@ -194,31 +194,6 @@ gui.Name = "PhucmaxUI"
 gui.ResetOnSplocal Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local lp = Players.LocalPlayer
-
-local function removeStunEffects()
-	local character = lp.Character
-	if not character then return end
-
-	for _, v in ipairs(character:GetDescendants()) do
-		if v:IsA("BoolValue") or v:IsA("StringValue") or v:IsA("IntValue") or v:IsA("ObjectValue") then
-			local name = v.Name:lower()
-			if name:find("stun") or name:find("ragdoll") or name:find("knock") or name:find("slow") then
-				v:Destroy()
-			end
-		end
-	end
-
-	local hrp = character:FindFirstChild("HumanoidRootPart")
-	if hrp then
-		local speed = hrp.Velocity.Magnitude
-		-- Chỉ reset nếu tốc độ quá lớn (văng)
-		if speed > 100 then
-			hrp.Velocity = Vector3.zero
-			hrp.RotVelocity = Vector3.zero
-		end
-	end
-endawn = false
-
 local main = Instance.new("Frame", gui)
 main.Size = UDim2.new(0, 260, 0, 270)
 main.Position = UDim2.new(0.5, -130, 0.4, -175)
