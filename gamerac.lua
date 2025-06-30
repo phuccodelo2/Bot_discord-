@@ -86,6 +86,81 @@ function setGodMode(state)
 	end
 end
 
+local infiniteJumpEnabled = false
+local jumpConnection
+
+function setInfiniteJump(state)
+	infiniteJumpEnabled = state
+
+	if infiniteJumpEnabled then
+		jumpConnection = game:GetService("UserInputService").JumpRequest:Connect(function()
+			local char = game.Players.LocalPlayer.Character
+			local hrp = char and char:FindFirstChild("HumanoidRootPart")
+			local hum = char and char:FindFirstChildOfClass("Humanoid")
+			if hum and hrp then
+				hum:ChangeState(Enum.HumanoidStateType.Jumping)
+			end
+		end)
+	else
+		if jumpConnection then
+			jumpConnection:Disconnect()
+			jumpConnection = nil
+		end
+	end
+end
+
+local flying = false
+local flyConnection
+
+function startFlying()
+	local player = game.Players.LocalPlayer
+	local char = player.Character or player.CharacterAdded:Wait()
+	local hrp = char:WaitForChild("HumanoidRootPart")
+	local hum = char:FindFirstChildOfClass("Humanoid")
+
+	if not hum or not hrp then return end
+
+	local speed = 50
+	local UIS = game:GetService("UserInputService")
+	local RS = game:GetService("RunService")
+	local moveVec = Vector3.zero
+
+	flyConnection = RS.RenderStepped:Connect(function()
+		if not flying or not hrp or not hum then return end
+
+		-- Lấy hướng di chuyển
+		moveVec = Vector3.zero
+		if UIS:IsKeyDown(Enum.KeyCode.W) then moveVec = moveVec + workspace.CurrentCamera.CFrame.LookVector end
+		if UIS:IsKeyDown(Enum.KeyCode.S) then moveVec = moveVec - workspace.CurrentCamera.CFrame.LookVector end
+		if UIS:IsKeyDown(Enum.KeyCode.A) then moveVec = moveVec - workspace.CurrentCamera.CFrame.RightVector end
+		if UIS:IsKeyDown(Enum.KeyCode.D) then moveVec = moveVec + workspace.CurrentCamera.CFrame.RightVector end
+
+		moveVec = Vector3.new(moveVec.X, 1, moveVec.Z).Unit -- luôn bay lên
+		hrp.Velocity = moveVec * speed
+	end)
+end
+
+function stopFlying()
+	if flyConnection then
+		flyConnection:Disconnect()
+		flyConnection = nil
+	end
+
+	local char = game.Players.LocalPlayer.Character
+	if char and char:FindFirstChild("HumanoidRootPart") then
+		char.HumanoidRootPart.Velocity = Vector3.new(0, -50, 0) -- rớt xuống
+	end
+end
+
+function toggleFly(state)
+	flying = state
+	if flying then
+		startFlying()
+	else
+		stopFlying()
+	end
+end
+
 -- Giao diện
 local gui = Instance.new("ScreenGui", game.CoreGui)
 gui.Name = "PhucmaxUI"
@@ -185,6 +260,14 @@ end)
 
 createButton("Bất tử", function(on)
 	setGodMode(on)
+end)
+
+createButton("Nhảy vô hạn", function(on)
+	setInfiniteJump(on)
+end)
+
+createButton("Bay Tự Do", function(on)
+	toggleFly(on)
 end)
 
 local function showNotification(msg)
