@@ -8,7 +8,7 @@ local doorPositions = {
 	Vector3.new(-354, -2, 115), Vector3.new(-358, -2, 223)
 }
 
--- Hàm tìm vị trí gần nhất
+-- Tìm vị trí gần nhất
 local function getClosestDoor()
 	local hrp = game.Players.LocalPlayer.Character:WaitForChild("HumanoidRootPart")
 	local closest, minDist = nil, math.huge
@@ -22,13 +22,13 @@ local function getClosestDoor()
 	return closest
 end
 
--- Hàm bay đến vị trí gần nhất và teleport lên trời
+-- Bay đến gần cửa rồi bay lên trời
 function goUp(onDone)
 	local target = getClosestDoor()
 	if not target then return end
 
 	local hrp = game.Players.LocalPlayer.Character:WaitForChild("HumanoidRootPart")
-	local speed = 80-- tốc độ bay
+	local speed = 80
 
 	while (hrp.Position - target).Magnitude > 5 do
 		local direction = (target - hrp.Position).Unit
@@ -36,20 +36,21 @@ function goUp(onDone)
 		task.wait(1/60)
 	end
 
-	-- Khi đến gần, bay lên trời 200
+	-- Bay lên trời
 	hrp.CFrame = hrp.CFrame + Vector3.new(0, 200, 0)
 
-	-- Gọi hàm tắt nút sau khi xong
-	if onDone then
-		onDone()
-	end
+	if onDone then onDone() end
 end
-if root then
-		root.CFrame = root.CFrame - Vector3.new(0, 50, 0)
+
+-- Rớt xuống
+function goDown()
+	local hrp = game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+	if hrp then
+		hrp.CFrame = hrp.CFrame - Vector3.new(0, 100, 0)
 	end
 end
 
-
+-- Giao diện
 local gui = Instance.new("ScreenGui", game.CoreGui)
 gui.Name = "PhucmaxUI"
 gui.ResetOnSpawn = false
@@ -62,7 +63,6 @@ main.Active = true
 main.Draggable = true
 Instance.new("UICorner", main).CornerRadius = UDim.new(0, 10)
 
-
 local title = Instance.new("TextLabel", main)
 title.Size = UDim2.new(1, 0, 0, 40)
 title.BackgroundTransparency = 1
@@ -71,18 +71,14 @@ title.Font = Enum.Font.FredokaOne
 title.TextScaled = true
 title.TextColor3 = Color3.new(1, 1, 1)
 
-
 local rainbowColors = {
-	Color3.fromRGB(255, 0, 0),    
-	Colorif root then
-		root.CFrame = root.CFrame - Vector3.new(0, 50, 0)
-	end
-end3.fromRGB(255, 127, 0), 
-	Color3.fromRGB(255, 255, 0),  
-	Color3.fromRGB(0, 255, 0),    
-	Color3.fromRGB(0, 255, 255),  
-	Color3.fromRGB(0, 0, 255),    
-	Color3.fromRGB(139, 0, 255)   
+	Color3.fromRGB(255, 0, 0),
+	Color3.fromRGB(255, 127, 0),
+	Color3.fromRGB(255, 255, 0),
+	Color3.fromRGB(0, 255, 0),
+	Color3.fromRGB(0, 255, 255),
+	Color3.fromRGB(0, 0, 255),
+	Color3.fromRGB(139, 0, 255)
 }
 
 spawn(function()
@@ -93,6 +89,7 @@ spawn(function()
 		end
 	end
 end)
+
 local content = Instance.new("Frame", main)
 content.Size = UDim2.new(1, 0, 1, -50)
 content.Position = UDim2.new(0, 0, 0, 45)
@@ -111,11 +108,11 @@ Instance.new("UICorner", logo).CornerRadius = UDim.new(0, 12)
 logo.MouseButton1Click:Connect(function()
 	main.Visible = not main.Visible
 end)
+
 local layout = Instance.new("UIListLayout", content)
 layout.Padding = UDim.new(0, 8)
 layout.SortOrder = Enum.SortOrder.LayoutOrder
 layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
-
 
 local function createButton(text, callback)
 	local btn = Instance.new("TextButton", content)
@@ -136,15 +133,19 @@ local function createButton(text, callback)
 	end)
 end
 
-
 createButton("Teleport to Sky", function(on)
 	if on then
 		goUp(function()
-			on = false -- tắt flag
+			-- không cần set on = false, vì button đã toggle rồi
 		end)
 	end
 end)
-createButton("rớt xuống", function(on) if on then goDown() end end)
+
+createButton("Rớt xuống", function(on)
+	if on then
+		goDown()
+	end
+end)
 
 local function showNotification(msg)
 	local notify = Instance.new("TextLabel")
@@ -162,13 +163,20 @@ local function showNotification(msg)
 
 	Instance.new("UICorner", notify).CornerRadius = UDim.new(0, 8)
 
-	
-	game:GetService("TweenService"):Create(notify, TweenInfo.new(0.5), {TextTransparency = 0, BackgroundTransparency = 0.2}):Play()
+	game:GetService("TweenService"):Create(notify, TweenInfo.new(0.5), {
+		TextTransparency = 0,
+		BackgroundTransparency = 0.2
+	}):Play()
+
 	wait(2.5)
-	game:GetService("TweenService"):Create(notify, TweenInfo.new(0.5), {TextTransparency = 1, BackgroundTransparency = 1}):Play()
+
+	game:GetService("TweenService"):Create(notify, TweenInfo.new(0.5), {
+		TextTransparency = 1,
+		BackgroundTransparency = 1
+	}):Play()
+
 	wait(0.6)
 	notify:Destroy()
 end
 
-
-showNotification("cảm ơn bạn đã sử dụng script ")
+showNotification("cảm ơn bạn đã sử dụng script")
