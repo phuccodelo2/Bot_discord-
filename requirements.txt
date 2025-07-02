@@ -1,21 +1,15 @@
 local Players = game:GetService("Players")
 local lp = Players.LocalPlayer
-local hrp = lp.Character and lp.Character:FindFirstChild("HumanoidRootPart")
+local char = lp.Character or lp.CharacterAdded:Wait()
+local hrp = char:WaitForChild("HumanoidRootPart")
 
-if not hrp then
-    lp.CharacterAdded:Wait()
-    hrp = lp.Character:WaitForChild("HumanoidRootPart")
-end
+-- Tọa độ gốc (nút cửa)
+local groundPos = Vector3.new(-517.5, -5.1, 101.4)
 
--- Tọa độ nút đóng cửa
-local fakePos = Vector3.new(-517.5, -5.1, 101.4)
+-- Tọa độ trên cao (cách mặt đất 10m)
+local abovePos = groundPos + Vector3.new(0, 10, 0)
 
--- Lưu vị trí gốc
-local oldCFrame = hrp.CFrame
+-- Tele lên trên cao
+hrp.CFrame = CFrame.new(abovePos)
 
--- Tele chớp
-hrp.CFrame = CFrame.new(fakePos)
-wait(0.15) -- đủ để server ghi nhận đã chạm
-hrp.CFrame = oldCFrame
-
-print("✅ Tele fake thực hiện xong.")
+print("✅ Đã tele lên trên cao. Đang rơi xuống...")
