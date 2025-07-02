@@ -1,40 +1,43 @@
--- 🧍‍♂️ Fake bóng nhân vật đứng tại vị trí chỉ định
+-- RSpy GUI Logger (hiển thị trên màn hình)
 local Players = game:GetService("Players")
 local lp = Players.LocalPlayer
-local char = lp.Character or lp.CharacterAdded:Wait()
 
--- Toạ độ muốn tạo bóng
-local targetPos = Vector3.new(-517.5, -5.1, 101.4)
+-- Tạo GUI
+local gui = Instance.new("ScreenGui")
+gui.Name = "RemoteLoggerGui"
+gui.ResetOnSpawn = false
+gui.Parent = lp:WaitForChild("PlayerGui")
 
--- Tạo bản sao nhân vật
-local clone = char:Clone()
-clone.Name = "FakeShadow"
-clone.Parent = workspace
+-- Tạo Label
+local label = Instance.new("TextLabel")
+label.Size = UDim2.new(1, 0, 0, 140)
+label.Position = UDim2.new(0, 0, 0.8, 0)
+label.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+label.BackgroundTransparency = 0.3
+label.TextColor3 = Color3.fromRGB(0, 255, 0)
+label.Font = Enum.Font.Code
+label.TextScaled = true
+label.TextWrapped = true
+label.Text = "🟢 Chạm nút để hiển thị RemoteEvent..."
+label.Parent = gui
 
--- Dừng mọi hoạt động
-if clone:FindFirstChild("Humanoid") then
-	clone.Humanoid:ChangeState(Enum.HumanoidStateType.Physics)
-end
-
--- Gỡ mọi script để tránh bug
-for _, v in pairs(clone:GetDescendants()) do
-	if v:IsA("Script") or v:IsA("LocalScript") then
-		v:Destroy()
+-- Bắt hook
+for _, f in ipairs(getgc(true)) do
+	if typeof(f) == "function" and islclosure(f) and not is_synapse_function(f) then
+		local constants = debug.getconstants(f)
+		if table.find(constants, "FireServer") or table.find(constants, "InvokeServer") then
+			hookfunction(f, function(...)
+				local args = {...}
+				local self = args[1]
+				if typeof(self) == "Instance" and (self:IsA("RemoteEvent") or self:IsA("RemoteFunction")) then
+					local txt = "📡 " .. self.ClassName .. ": " .. self:GetFullName()
+					for i = 2, #args do
+						txt = txt .. "\n🟨 Arg[" .. (i - 1) .. "]: " .. tostring(args[i])
+					end
+					label.Text = txt
+				end
+				return f(...)
+			end)
+		end
 	end
 end
-
--- Đặt vị trí đứng yên
-if clone:FindFirstChild("HumanoidRootPart") then
-	clone:MoveTo(targetPos + Vector3.new(0, 3, 0)) -- Đứng cao hơn mặt đất một chút
-end
-
--- Làm cho trong suốt 30% để giống bóng
-for _, part in pairs(clone:GetDescendants()) do
-	if part:IsA("BasePart") then
-		part.Anchored = true
-		part.CanCollide = false
-		part.Transparency = 0.3
-	end
-end
-
-print("✅ Đã tạo bóng đứng tại tọa độ.")
