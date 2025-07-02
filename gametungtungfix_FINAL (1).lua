@@ -143,7 +143,7 @@ local doorPositions = {
 -- Bật/tắt chức năng teleport
 local teleportEnabled = true  -- bạn có thể đổi giá trị này khi tắt menu
 
-local function getClosestDoor()
+local function getClosestDoor() 
 	local hrp = Players.LocalPlayer.Character:WaitForChild("HumanoidRootPart")
 	local closest, minDist = nil, math.huge
 	for _, pos in ipairs(doorPositions) do
