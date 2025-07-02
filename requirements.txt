@@ -1,41 +1,8 @@
--- 📡 RSpy bắt trực tiếp mọi Remote gọi FireServer / InvokeServer
-local Players = game:GetService("Players")
-local lp = Players.LocalPlayer
+-- Tele đến nút thật rồi quay về trong 0.15s
+local hrp = game.Players.LocalPlayer.Character:WaitForChild("HumanoidRootPart")
+local old = hrp.CFrame
+local target = CFrame.new(-517.5, -5.1 + 3, 101.4)
 
--- GUI
-local gui = Instance.new("ScreenGui", lp:WaitForChild("PlayerGui"))
-gui.Name = "TrueRSpy"
-gui.ResetOnSpawn = false
-
-local text = Instance.new("TextLabel", gui)
-text.Size = UDim2.new(1, 0, 0, 140)
-text.Position = UDim2.new(0, 0, 0.8, 0)
-text.BackgroundTransparency = 0.3
-text.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-text.TextColor3 = Color3.fromRGB(255, 255, 0)
-text.TextScaled = true
-text.TextWrapped = true
-text.Font = Enum.Font.Code
-text.Text = "🕵️ Đang theo dõi Remote..."
-
--- Hook gốc
-local mt = getrawmetatable(game)
-setreadonly(mt, false)
-local oldNamecall = mt.__namecall
-
-mt.__namecall = newcclosure(function(self, ...)
-	local method = getnamecallmethod()
-	local args = {...}
-
-	if self and (method == "FireServer" or method == "InvokeServer") then
-		local log = "📡 " .. self.ClassName .. ": " .. self:GetFullName()
-		for i, arg in ipairs(args) do
-			log = log .. "\n🟨 Arg[" .. i .. "]: " .. tostring(arg)
-		end
-		text.Text = log
-	end
-
-	return oldNamecall(self, ...)
-end)
-
-print("✅ RSpy TRUE đang hoạt động.")
+hrp.CFrame = target
+task.wait(0.15)
+hrp.CFrame = old
