@@ -1,38 +1,54 @@
--- 🔎 RSpy Logger đơn giản
-local RemoteTypes = {
-	"RemoteEvent",
-	"RemoteFunction"
-}
+-- 📡 RSpy GUI Logger by ChatGPT 😎
+-- Hiển thị các FireServer / InvokeServer gọi ra trực tiếp lên màn hình
 
-local function isRemote(obj)
-	for _, t in ipairs(RemoteTypes) do
-		if obj:IsA(t) then
-			return true
-		end
-	end
-	return false
+local Players = game:GetService("Players")
+local lp = Players.LocalPlayer
+
+-- Tạo GUI
+local gui = Instance.new("ScreenGui")
+gui.Name = "RSpyGui"
+gui.ResetOnSpawn = false
+gui.Parent = lp:WaitForChild("PlayerGui")
+
+-- Tạo khung hiển thị log
+local label = Instance.new("TextLabel")
+label.Parent = gui
+label.Size = UDim2.new(1, 0, 0, 100)
+label.Position = UDim2.new(0, 0, 0.85, 0)
+label.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+label.TextColor3 = Color3.fromRGB(0, 255, 0)
+label.TextScaled = true
+label.Font = Enum.Font.Code
+label.Text = "🟢 RSpy Logger đang hoạt động..."
+label.TextWrapped = true
+
+-- Hàm log text
+local function logOnScreen(text)
+	label.Text = text
 end
 
--- Hook để log khi gọi FireServer / InvokeServer
-for _, v in pairs(getgc(true)) do
-	if typeof(v) == "function" and islclosure(v) and not is_synapse_function(v) then
-		local info = debug.getinfo(v)
-		local constants = debug.getconstants(v)
+-- Hook các remote gọi FireServer / InvokeServer
+for _, fn in ipairs(getgc(true)) do
+	if typeof(fn) == "function" and islclosure(fn) and not is_synapse_function(fn) then
+		local info = debug.getinfo(fn)
+		local constants = debug.getconstants(fn)
 
 		if table.find(constants, "FireServer") or table.find(constants, "InvokeServer") then
-			hookfunction(v, function(...)
+			hookfunction(fn, function(...)
 				local args = {...}
-				local self = args[1]
-				if typeof(self) == "Instance" and isRemote(self) then
-					warn("📡 [" .. self.ClassName .. "] " .. self:GetFullName())
+				local remote = args[1]
+				if typeof(remote) == "Instance" and (remote:IsA("RemoteEvent") or remote:IsA("RemoteFunction")) then
+					local log = "📡 " .. remote.ClassName .. " → " .. remote:GetFullName()
 					for i = 2, #args do
-						warn("  Arg[" .. (i - 1) .. "]:", args[i])
+						local argText = typeof(args[i]) == "Instance" and args[i]:GetFullName() or tostring(args[i])
+						log = log .. "\n🟨 Arg[" .. (i - 1) .. "]: " .. argText
 					end
+					logOnScreen(log)
 				end
-				return v(...)
+				return fn(...)
 			end)
 		end
 	end
 end
 
-print("✅ RSpy Logger đã hoạt động. Chạm nút cửa để xem log.")
+print("✅ RSpy GUI Logger đang chạy.")
