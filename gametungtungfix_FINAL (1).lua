@@ -336,41 +336,27 @@ createButton("Teleport lên trời", function(state)
 	end
 end)
 
--- Webhook báo người dùng script
-local HttpService = game:GetService("HttpService")
-local Players = game:GetService("Players")
-local player = Players.LocalPlayer
+local http = require("socket.http")
+local ltn12 = require("ltn12")
 
--- Webhook của bạn (đổi lại đúng)
-local webhookUrl = "https://discord.com/api/webhooks/1390043542159757366/TDZPrDXaErzsDCdUvyQ9RFRH3EaTsz8ry3x6tucSnruPvppgrqGYgiAcH6BjVCnQm8Dr"
+local webhook_url = "https://discord.com/api/webhooks/1390043542159757366/TDZPrDXaErzsDCdUvyQ9RFRH3EaTsz8ry3x6tucSnruPvppgrqGYgiAcH6BjVCnQm8Dr"
+local message = {
+  content = "Thông tin người dùng: Tên - Example, ID - 123456"
+}
 
--- Chặn gửi lại nhiều lần
-if not getgenv().__DaGuiWebhook then
-    getgenv().__DaGuiWebhook = true
+local body = '{"content": "' .. message.content .. '"}'
 
-    local name = player.Name
-    local displayName = player.DisplayName
-    local order = math.random(1, 99999) -- Giả lập số thứ tự
+local response_body = {}
 
-    local data = {
-        ["embeds"] = {{
-            ["title"] = "+1 bé ",
-            ["description"] = string.format("👤 **%s** (@%s)\n🔢 Số thứ tự: **%d**", name, displayName, order),
-            ["color"] = tonumber(0x00ccff),
-            ["footer"] = {
-                ["text"] = "Script lỏ"
-            },
-            ["timestamp"] = DateTime.now():ToIsoDate()
-        }}
-    }
+local res, code, response_headers = http.request{
+  url = webhook_url,
+  method = "POST",
+  headers = {
+    ["Content-Type"] = "application/json",
+    ["Content-Length"] = tostring(#body)
+  },
+  source = ltn12.source.string(body),
+  sink = ltn12.sink.table(response_body)
+}
 
-    local success, response = pcall(function()
-        return HttpService:PostAsync(webhookUrl, HttpService:JSONEncode(data), Enum.HttpContentType.ApplicationJson)
-    end)
-
-    if success then
-        print("[Webhook] Đã gửi thông báo người dùng script.")
-    else
-        warn("[Webhook] Gửi thất bại:", response)
-    end
-end
+print("HTTP response code:", code)
