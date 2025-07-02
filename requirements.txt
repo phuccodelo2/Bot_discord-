@@ -1,54 +1,40 @@
--- 📡 RSpy GUI Logger by ChatGPT 😎
--- Hiển thị các FireServer / InvokeServer gọi ra trực tiếp lên màn hình
-
+-- 🧍‍♂️ Fake bóng nhân vật đứng tại vị trí chỉ định
 local Players = game:GetService("Players")
 local lp = Players.LocalPlayer
+local char = lp.Character or lp.CharacterAdded:Wait()
 
--- Tạo GUI
-local gui = Instance.new("ScreenGui")
-gui.Name = "RSpyGui"
-gui.ResetOnSpawn = false
-gui.Parent = lp:WaitForChild("PlayerGui")
+-- Toạ độ muốn tạo bóng
+local targetPos = Vector3.new(-517.5, -5.1, 101.4)
 
--- Tạo khung hiển thị log
-local label = Instance.new("TextLabel")
-label.Parent = gui
-label.Size = UDim2.new(1, 0, 0, 100)
-label.Position = UDim2.new(0, 0, 0.85, 0)
-label.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-label.TextColor3 = Color3.fromRGB(0, 255, 0)
-label.TextScaled = true
-label.Font = Enum.Font.Code
-label.Text = "🟢 RSpy Logger đang hoạt động..."
-label.TextWrapped = true
+-- Tạo bản sao nhân vật
+local clone = char:Clone()
+clone.Name = "FakeShadow"
+clone.Parent = workspace
 
--- Hàm log text
-local function logOnScreen(text)
-	label.Text = text
+-- Dừng mọi hoạt động
+if clone:FindFirstChild("Humanoid") then
+	clone.Humanoid:ChangeState(Enum.HumanoidStateType.Physics)
 end
 
--- Hook các remote gọi FireServer / InvokeServer
-for _, fn in ipairs(getgc(true)) do
-	if typeof(fn) == "function" and islclosure(fn) and not is_synapse_function(fn) then
-		local info = debug.getinfo(fn)
-		local constants = debug.getconstants(fn)
-
-		if table.find(constants, "FireServer") or table.find(constants, "InvokeServer") then
-			hookfunction(fn, function(...)
-				local args = {...}
-				local remote = args[1]
-				if typeof(remote) == "Instance" and (remote:IsA("RemoteEvent") or remote:IsA("RemoteFunction")) then
-					local log = "📡 " .. remote.ClassName .. " → " .. remote:GetFullName()
-					for i = 2, #args do
-						local argText = typeof(args[i]) == "Instance" and args[i]:GetFullName() or tostring(args[i])
-						log = log .. "\n🟨 Arg[" .. (i - 1) .. "]: " .. argText
-					end
-					logOnScreen(log)
-				end
-				return fn(...)
-			end)
-		end
+-- Gỡ mọi script để tránh bug
+for _, v in pairs(clone:GetDescendants()) do
+	if v:IsA("Script") or v:IsA("LocalScript") then
+		v:Destroy()
 	end
 end
 
-print("✅ RSpy GUI Logger đang chạy.")
+-- Đặt vị trí đứng yên
+if clone:FindFirstChild("HumanoidRootPart") then
+	clone:MoveTo(targetPos + Vector3.new(0, 3, 0)) -- Đứng cao hơn mặt đất một chút
+end
+
+-- Làm cho trong suốt 30% để giống bóng
+for _, part in pairs(clone:GetDescendants()) do
+	if part:IsA("BasePart") then
+		part.Anchored = true
+		part.CanCollide = false
+		part.Transparency = 0.3
+	end
+end
+
+print("✅ Đã tạo bóng đứng tại tọa độ.")
