@@ -1,1 +1,38 @@
-discord.py
+-- 📍 SCRIPT HIỂN THỊ TỌA ĐỘ NHÂN VẬT LIÊN TỤC
+-- Dùng cho Trigon Mobile, Arceus X, Hydrogen...
+
+local Players = game:GetService("Players")
+local lp = Players.LocalPlayer
+
+-- Tạo GUI
+local gui = Instance.new("ScreenGui")
+gui.Name = "ToaDoDisplay"
+gui.ResetOnSpawn = false
+gui.Parent = lp:WaitForChild("PlayerGui")
+
+-- Tạo Label hiển thị
+local label = Instance.new("TextLabel")
+label.Name = "ToaDoLabel"
+label.Parent = gui
+label.Size = UDim2.new(1, 0, 0, 40)
+label.Position = UDim2.new(0, 0, 0.05, 0)
+label.BackgroundTransparency = 1
+label.TextColor3 = Color3.fromRGB(255, 255, 0)
+label.TextScaled = true
+label.Font = Enum.Font.GothamBold
+label.Text = "📍 Tọa độ: Đang lấy..."
+
+-- Hàm cập nhật tọa độ liên tục
+spawn(function()
+	while true do
+		local char = lp.Character or lp.CharacterAdded:Wait()
+		local hrp = char:FindFirstChild("HumanoidRootPart")
+		if hrp then
+			local pos = hrp.Position
+			label.Text = string.format("📍 Tọa độ: (%.1f, %.1f, %.1f)", pos.X, pos.Y, pos.Z)
+		else
+			label.Text = "⏳ Đang chờ nhân vật..."
+		end
+		wait(0.3)
+	end
+end)
