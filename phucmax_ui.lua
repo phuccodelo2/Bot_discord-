@@ -52,7 +52,7 @@ gui.Name = "Teleport to Floor2"
 gui.ResetOnSpawn = false
 
 local btn = Instance.new("TextButton", gui)
-btn.Size = UDim2.new(0, 200, 0, 40)
+btn.Size = UDim2.new(0, 250, 0, 40)
 btn.Position = UDim2.new(0, 20, 0.5, -20)
 btn.BackgroundColor3 = Color3.fromRGB(0, 120, 255)
 btn.TextColor3 = Color3.new(1, 1, 1)
@@ -72,6 +72,6 @@ btn.MouseButton1Click:Connect(function()
 	teleportToClosest()
 
 	teleportEnabled = false
-	btn.Text = "▶ Teleport gần nhất"
+	btn.Text = "stand in front of the 2nd floor door "
 	btn.BackgroundColor3 = Color3.fromRGB(0, 120, 255)
 end)
