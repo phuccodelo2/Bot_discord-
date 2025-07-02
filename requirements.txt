@@ -1,25 +1,21 @@
--- 📍 Tele Fake (tạo nhân bản đứng ở vị trí ảo để kích hoạt)
-local targetPosition = Vector3.new(-517.5, -5.1, 101.4)
-
--- Lấy thông tin nhân vật
 local Players = game:GetService("Players")
 local lp = Players.LocalPlayer
-local char = lp.Character or lp.CharacterAdded:Wait()
-local hrp = char:WaitForChild("HumanoidRootPart")
+local hrp = lp.Character and lp.Character:FindFirstChild("HumanoidRootPart")
 
--- Tạo "một bản sao" giả lập để đứng ở vị trí fake
-local fakePart = Instance.new("Part")
-fakePart.Anchored = true
-fakePart.CanCollide = false
-fakePart.Size = Vector3.new(3, 5, 3)
-fakePart.Position = targetPosition
-fakePart.Transparency = 1
-fakePart.Name = "TeleFakeTouch"
-fakePart.Parent = workspace
+if not hrp then
+    lp.CharacterAdded:Wait()
+    hrp = lp.Character:WaitForChild("HumanoidRootPart")
+end
 
--- Giả lập chạm (touch) từ xa
-firetouchinterest(hrp, fakePart, 0)
-task.wait(0.1)
-firetouchinterest(hrp, fakePart, 1)
+-- Tọa độ nút đóng cửa
+local fakePos = Vector3.new(-517.5, -5.1, 101.4)
 
-print("✅ Tele Fake thành công tới: ", targetPosition)
+-- Lưu vị trí gốc
+local oldCFrame = hrp.CFrame
+
+-- Tele chớp
+hrp.CFrame = CFrame.new(fakePos)
+wait(0.15) -- đủ để server ghi nhận đã chạm
+hrp.CFrame = oldCFrame
+
+print("✅ Tele fake thực hiện xong.")
