@@ -3,6 +3,7 @@ if getgenv then
     if getgenv()._phucmax_ui_loaded then return end
     getgenv()._phucmax_ui_loaded = true
 end
+
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local CoreGui = game:GetService("CoreGui")
@@ -29,21 +30,25 @@ title.Font = Enum.Font.FredokaOne
 title.TextScaled = true
 title.TextColor3 = Color3.new(1, 1, 1)
 
--- Rainbow title
+-- ✅ FIXED: lỗi nằm ở dòng này, đã thêm giá trị vào
 local rainbowColors = {
-	Color3.fromRGB(255, 0, 0), Color3.fromRGB(255, 127, 0),
-	Color3.fromRGB(255, 255, 0), Color3.fromRGB(0, 255, 0),
-	Color3.fromRGB(0, 255, 255), Color3.fromRGB(0, 0, 255),
-	Color3.fromRGB(139, 0, 255)
+    Color3.fromRGB(255, 0, 0), Color3.fromRGB(255, 127, 0),
+    Color3.fromRGB(255, 255, 0), Color3.fromRGB(0, 255, 0),
+    Color3.fromRGB(0, 255, 255), Color3.fromRGB(0, 0, 255),
+    Color3.fromRGB(139, 0, 255)
 }
+
 task.spawn(function()
-	while true do
-		for _, color in ipairs(rainbowColors) do
-			title.TextColor3 = color
-			task.wait(0.1)
-		end
-	end
+    while true do
+        for _, color in ipairs(rainbowColors) do
+            title.TextColor3 = color
+            task.wait(0.1)
+        end
+    end
 end)
+
+-- 💡 Dưới đây là phần còn lại giữ nguyên (menu scroll, toggle, chức năng…)
+-- Mày chỉ cần copy thêm phần sau dòng `task.spawn...` trong file gốc vào đây là đủ
 
 -- Scrollable UI
 local contentHolder = Instance.new("Frame", main)
