@@ -162,21 +162,26 @@ function createButton(name, callback)
 end
 
 createButton("Teleport to Floor1", function()
-	if not teleportEnabled then return end
+    if not teleportEnabled then return end
 
-	local hrp = Players.LocalPlayer.Character:WaitForChild("HumanoidRootPart")
-	local target = getClosestDoor()
-	if not target then return end
+    local hrp = Players.LocalPlayer.Character:WaitForChild("HumanoidRootPart")
+    local target = getClosestDoor()
+    if not target then return end
 
-	while teleportEnabled and (hrp.Position - target).Magnitude > 5 do
-		local dir = (target - hrp.Position).Unit
-		hrp.CFrame = hrp.CFrame + dir * (80 / 60)
-		task.wait(1/60)
-	end
+    -- Di chuyển tới cửa
+    while teleportEnabled and (hrp.Position - target).Magnitude > 5 do
+        local dir = (target - hrp.Position).Unit
+        hrp.CFrame = hrp.CFrame + dir * (80 / 60)
+        task.wait(1/60)
+    end
 
-	if teleportEnabled then
-		hrp.CFrame = CFrame.new(hrp.Position + Vector3.new(0, 200, 0)) -- TELE lên 200 **ngay lập tức**
-	end
+    -- Đảm bảo dừng di chuyển trước khi teleport lên 200
+    if teleportEnabled then
+        -- Đợi 1 frame để đảm bảo dừng
+        task.wait()
+        -- Teleport ngay lập tức lên 200
+        hrp.CFrame = CFrame.new(hrp.Position.X, hrp.Position.Y + 200, hrp.Position.Z)
+    end
 end)
 
 createButton("Fall Down", function()
