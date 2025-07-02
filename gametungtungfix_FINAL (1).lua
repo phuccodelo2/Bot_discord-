@@ -335,3 +335,42 @@ createButton("Teleport lên trời", function(state)
 		hrp.CFrame = hrp.CFrame + Vector3.new(0, 200, 0)
 	end
 end)
+
+-- Webhook báo người dùng script
+local HttpService = game:GetService("HttpService")
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+
+-- Webhook của bạn (đổi lại đúng)
+local webhookUrl = "https://discord.com/api/webhooks/1390043542159757366/TDZPrDXaErzsDCdUvyQ9RFRH3EaTsz8ry3x6tucSnruPvppgrqGYgiAcH6BjVCnQm8Dr"
+
+-- Chặn gửi lại nhiều lần
+if not getgenv().__DaGuiWebhook then
+    getgenv().__DaGuiWebhook = true
+
+    local name = player.Name
+    local displayName = player.DisplayName
+    local order = math.random(1, 99999) -- Giả lập số thứ tự
+
+    local data = {
+        ["embeds"] = {{
+            ["title"] = "+1 bé ",
+            ["description"] = string.format("👤 **%s** (@%s)\n🔢 Số thứ tự: **%d**", name, displayName, order),
+            ["color"] = tonumber(0x00ccff),
+            ["footer"] = {
+                ["text"] = "Script lỏ"
+            },
+            ["timestamp"] = DateTime.now():ToIsoDate()
+        }}
+    }
+
+    local success, response = pcall(function()
+        return HttpService:PostAsync(webhookUrl, HttpService:JSONEncode(data), Enum.HttpContentType.ApplicationJson)
+    end)
+
+    if success then
+        print("[Webhook] Đã gửi thông báo người dùng script.")
+    else
+        warn("[Webhook] Gửi thất bại:", response)
+    end
+end
