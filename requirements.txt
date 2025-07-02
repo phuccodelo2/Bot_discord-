@@ -1,28 +1,30 @@
--- ⏱️ RSpy – Hiển thị các Remote có tham số là thời gian (giây) lên màn hình
+-- ⏱️ RSpy – Lọc remote có số giây và hiện chính giữa màn hình
 local Players = game:GetService("Players")
 local lp = Players.LocalPlayer
 
--- Tạo GUI hiển thị log
+-- GUI
 local gui = Instance.new("ScreenGui", lp:WaitForChild("PlayerGui"))
-gui.Name = "RSpyTimeLogger"
+gui.Name = "RSpySecondsCenter"
 gui.ResetOnSpawn = false
 
 local label = Instance.new("TextLabel")
 label.Parent = gui
-label.Size = UDim2.new(1, 0, 0, 120)
-label.Position = UDim2.new(0, 0, 0.8, 0)
+label.Size = UDim2.new(0.8, 0, 0.25, 0) -- To hơn
+label.Position = UDim2.new(0.1, 0, 0.375, 0) -- Chính giữa màn hình
 label.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 label.BackgroundTransparency = 0.2
+label.BorderSizePixel = 2
+label.BorderColor3 = Color3.fromRGB(255, 255, 0)
 label.TextColor3 = Color3.fromRGB(255, 255, 0)
+label.Font = Enum.Font.SourceSansBold
 label.TextScaled = true
 label.TextWrapped = true
-label.Font = Enum.Font.Code
-label.Text = "🕒 Đang theo dõi Remote có giây..."
+label.Text = "⏱️ Đang theo dõi remote có số giây..."
 
 -- Hook metatable
 local mt = getrawmetatable(game)
 setreadonly(mt, false)
-local oldNamecall = mt.__namecall
+local old = mt.__namecall
 
 mt.__namecall = newcclosure(function(self, ...)
 	local method = getnamecallmethod()
@@ -34,15 +36,15 @@ mt.__namecall = newcclosure(function(self, ...)
 
 		for i, arg in ipairs(args) do
 			if typeof(arg) == "number" and arg >= 0.05 and arg <= 60 then
-				local text = "⏱️ " .. self.ClassName .. ": " .. self:GetFullName()
-				text = text .. "\n🟨 Arg["..i.."] = " .. tostring(arg) .. " (giây?)"
-				label.Text = text
+				local msg = "📡 " .. self.ClassName .. ": " .. self:GetFullName()
+				msg = msg .. "\n🟨 Arg[" .. i .. "] = " .. tostring(arg) .. " (giây?)"
+				label.Text = msg
 				break
 			end
 		end
 	end
 
-	return oldNamecall(self, ...)
+	return old(self, ...)
 end)
 
-print("✅ RSpy Giây đang chạy.")
+print("✅ RSpy Giây – Đang hiện giữa màn hình.")
