@@ -1,15 +1,38 @@
-local Players = game:GetService("Players")
-local lp = Players.LocalPlayer
-local char = lp.Character or lp.CharacterAdded:Wait()
-local hrp = char:WaitForChild("HumanoidRootPart")
+-- 🔎 RSpy Logger đơn giản
+local RemoteTypes = {
+	"RemoteEvent",
+	"RemoteFunction"
+}
 
--- Tọa độ gốc (nút cửa)
-local groundPos = Vector3.new(-517.5, -5.1, 101.4)
+local function isRemote(obj)
+	for _, t in ipairs(RemoteTypes) do
+		if obj:IsA(t) then
+			return true
+		end
+	end
+	return false
+end
 
--- Tọa độ trên cao (cách mặt đất 10m)
-local abovePos = groundPos + Vector3.new(0, 2, 0)
+-- Hook để log khi gọi FireServer / InvokeServer
+for _, v in pairs(getgc(true)) do
+	if typeof(v) == "function" and islclosure(v) and not is_synapse_function(v) then
+		local info = debug.getinfo(v)
+		local constants = debug.getconstants(v)
 
--- Tele lên trên cao
-hrp.CFrame = CFrame.new(abovePos)
+		if table.find(constants, "FireServer") or table.find(constants, "InvokeServer") then
+			hookfunction(v, function(...)
+				local args = {...}
+				local self = args[1]
+				if typeof(self) == "Instance" and isRemote(self) then
+					warn("📡 [" .. self.ClassName .. "] " .. self:GetFullName())
+					for i = 2, #args do
+						warn("  Arg[" .. (i - 1) .. "]:", args[i])
+					end
+				end
+				return v(...)
+			end)
+		end
+	end
+end
 
-print("✅ Đã tele lên trên cao. Đang rơi xuống...")
+print("✅ RSpy Logger đã hoạt động. Chạm nút cửa để xem log.")
