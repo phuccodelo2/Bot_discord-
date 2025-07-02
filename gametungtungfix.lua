@@ -181,10 +181,6 @@ createButton("Fall Down", function()
 	end
 end)
 
-createRunButton("Teleport to Floor2", function()
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/phuccodelo2/Bot_discord-/refs/heads/main/phucmax_ui.lua"))()
-end)
-
 createButton("Teleport sky", function(state)
 	if state then
 		local char = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
