@@ -227,72 +227,65 @@ createButton("Godmode", function(state)
     end
 end, true)
 
--- === ESP ===
-local espEnabled = false
-local espFolder = Instance.new("Folder", CoreGui)
-espFolder.Name = "ESPFolder"
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local LocalPlayer = Players.LocalPlayer
+local Camera = workspace.CurrentCamera
+
+local espEnabled = true
+local espFolder = Instance.new("Folder", LocalPlayer:WaitForChild("PlayerGui"))
+espFolder.Name = "ESP_BOX_FOLDER"
+
+local boxes = {}
 
 local function clearESP()
-    for _, v in ipairs(espFolder:GetChildren()) do
-        v:Destroy()
-    end
+	for _, v in ipairs(espFolder:GetChildren()) do
+		v:Destroy()
+	end
+	boxes = {}
 end
 
-local function createESP()
-    clearESP()
-    for _, player in ipairs(Players:GetPlayers()) do
-        if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("Head") then
-            local head = player.Character.Head
-            local billboard = Instance.new("BillboardGui", espFolder)
-            billboard.Adornee = head
-            billboard.Size = UDim2.new(0, 100, 0, 40)
-            billboard.StudsOffset = Vector3.new(0, 2, 0)
-            billboard.AlwaysOnTop = true
-
-            local label = Instance.new("TextLabel", billboard)
-            label.Size = UDim2.new(1, 0, 1, 0)
-            label.BackgroundTransparency = 1
-            label.Text = player.Name
-            label.TextColor3 = Color3.fromRGB(0, 255, 0)
-            label.Font = Enum.Font.GothamBold
-            label.TextScaled = true
-        end
-    end
+local function createBoxESP()
+	clearESP()
+	for _, player in ipairs(Players:GetPlayers()) do
+		if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+			local box = Instance.new("BoxHandleAdornment")
+			box.Name = "ESPBox"
+			box.Adornee = player.Character.HumanoidRootPart
+			box.AlwaysOnTop = true
+			box.ZIndex = 0
+			box.Size = Vector3.new(4, 6, 2)
+			box.Transparency = 0.2
+			box.Parent = espFolder
+			boxes[player] = box
+		end
+	end
 end
 
-createButton("ESP", function(state)
-    espEnabled = state
-    if state then
-        spawn(function()
-            while espEnabled do
-                createESP()
-                wait(0.5)
-            end
-        end)
-    else
-        clearESP()
-    end
-end, true)
+-- Bật ESP
+spawn(function()
+	while espEnabled do
+		createBoxESP()
+		wait(1)
+	end
+end)
 
--- === Anti-Stun ===
-local antiStunConn
-createButton("Anti-Stun", function(state)
-    if state then
-        if antiStunConn then antiStunConn:Disconnect() end
-        antiStunConn = RunService.Stepped:Connect(function()
-            local char = LocalPlayer.Character
-            if char then
-                for _, obj in pairs(char:GetDescendants()) do
-                    if obj:IsA("BoolValue") and obj.Name:lower():find("stun") then
-                        obj:Destroy()
-                    end
-                end
-            end
-        end)
-    else
-        if antiStunConn then antiStunConn:Disconnect() antiStunConn = nil end
-    end
-end, true)
+-- Rainbow viền đổi màu liên tục
+spawn(function()
+	local hue = 0
+	while espEnabled do
+		hue = (hue + 0.01) % 1
+		local color = Color3.fromHSV(hue, 1, 1)
+		for _, box in pairs(boxes) do
+			if box then
+				box.Color3 = color
+			end
+		end
+		RunService.Heartbeat:Wait()
+	end
+end)
+
+
 
 -- === Invisibility ===
 createButton("Invisibility", function(state)
@@ -319,14 +312,5 @@ createButton("Invisibility", function(state)
                 end
             end
         end
-    end
-end, true)
-
--- === Teleport lên trời ===
-createButton("Teleport lên trời", function(state)
-    if state then
-        local char = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
-        local hrp = char:WaitForChild("HumanoidRootPart")
-        hrp.CFrame = hrp.CFrame + Vector3.new(0, 200, 0)
     end
 end, true)
