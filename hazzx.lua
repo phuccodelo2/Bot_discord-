@@ -227,64 +227,110 @@ createButton("Godmode", function(state)
     end
 end, true)
 
+
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local LocalPlayer = Players.LocalPlayer
-local Camera = workspace.CurrentCamera
+local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 
 local espEnabled = true
-local espFolder = Instance.new("Folder", LocalPlayer:WaitForChild("PlayerGui"))
-espFolder.Name = "ESP_BOX_FOLDER"
+local espFolder = Instance.new("Folder", PlayerGui)
+espFolder.Name = "ESP_RAINBOW_FOLDER"
 
-local boxes = {}
+local highlights = {}
+local nametags = {}
 
+-- Xóa ESP cũ
 local function clearESP()
-	for _, v in ipairs(espFolder:GetChildren()) do
-		v:Destroy()
+	for _, obj in pairs(highlights) do
+		if obj then obj:Destroy() end
 	end
-	boxes = {}
+	for _, obj in pairs(nametags) do
+		if obj then obj:Destroy() end
+	end
+	highlights = {}
+	nametags = {}
 end
 
-local function createBoxESP()
+-- Kiểm tra nhân vật có tàng hình không
+local function isCharacterInvisible(character)
+	for _, part in ipairs(character:GetDescendants()) do
+		if part:IsA("BasePart") and part.Transparency < 1 then
+			return false
+		end
+	end
+	return true
+end
+
+-- Tạo ESP
+local function createESP()
 	clearESP()
 	for _, player in ipairs(Players:GetPlayers()) do
 		if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-			local box = Instance.new("BoxHandleAdornment")
-			box.Name = "ESPBox"
-			box.Adornee = player.Character.HumanoidRootPart
-			box.AlwaysOnTop = true
-			box.ZIndex = 0
-			box.Size = Vector3.new(4, 6, 2)
-			box.Transparency = 0.2
-			box.Parent = espFolder
-			boxes[player] = box
+			local isInvisible = isCharacterInvisible(player.Character)
+
+			-- Highlight
+			local hl = Instance.new("Highlight")
+			hl.Adornee = player.Character
+			hl.FillTransparency = 0.2
+			hl.OutlineTransparency = 0
+			hl.Parent = espFolder
+			highlights[player] = {highlight = hl, invisible = isInvisible}
+
+			-- Tên
+			local head = player.Character:FindFirstChild("Head")
+			if head then
+				local tag = Instance.new("BillboardGui", espFolder)
+				tag.Name = "NameTag"
+				tag.Adornee = head
+				tag.Size = UDim2.new(0, 100, 0, 40)
+				tag.StudsOffset = Vector3.new(0, 2.5, 0)
+				tag.AlwaysOnTop = true
+
+				local text = Instance.new("TextLabel", tag)
+				text.Size = UDim2.new(1, 0, 1, 0)
+				text.BackgroundTransparency = 1
+				text.Text = player.Name
+				text.TextColor3 = Color3.fromRGB(0, 255, 0)
+				text.Font = Enum.Font.GothamBold
+				text.TextScaled = true
+
+				nametags[player] = tag
+			end
 		end
 	end
 end
 
--- Bật ESP
+-- Tạo ESP liên tục
 spawn(function()
 	while espEnabled do
-		createBoxESP()
+		createESP()
 		wait(1)
 	end
 end)
 
--- Rainbow viền đổi màu liên tục
+-- Hiệu ứng rainbow liên tục
 spawn(function()
 	local hue = 0
 	while espEnabled do
 		hue = (hue + 0.01) % 1
 		local color = Color3.fromHSV(hue, 1, 1)
-		for _, box in pairs(boxes) do
-			if box then
-				box.Color3 = color
+		for _, data in pairs(highlights) do
+			if data and data.highlight then
+				if data.invisible then
+					-- Nếu người chơi tàng hình thì viền đỏ đậm
+					data.highlight.FillColor = Color3.fromRGB(255, 0, 0)
+					data.highlight.OutlineColor = Color3.fromRGB(255, 0, 0)
+				else
+					-- Nếu bình thường thì rainbow
+					data.highlight.FillColor = color
+					data.highlight.OutlineColor = color
+				end
 			end
 		end
 		RunService.Heartbeat:Wait()
 	end
 end)
-
 
 
 -- === Invisibility ===
