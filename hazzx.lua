@@ -257,7 +257,7 @@ end
 
 -- Tạo ESP cho người chơi
 local function createESP()
-	clearESP()
+	clearESP()			
 
 	for _, player in ipairs(Players:GetPlayers()) do
 		if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
