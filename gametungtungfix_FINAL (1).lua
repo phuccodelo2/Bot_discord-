@@ -235,7 +235,63 @@ local godConncreateButton("Godmode", function(state)
 	end
 end)
 
-			
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local LocalPlayer = Players.LocalPlayer
+local Camera = workspace.CurrentCamera
+
+local espEnabled = true
+local espFolder = Instance.new("Folder", LocalPlayer:WaitForChild("PlayerGui"))
+espFolder.Name = "ESP_BOX_FOLDER"
+
+local boxes = {}
+
+local function clearESP()
+	for _, v in ipairs(espFolder:GetChildren()) do
+		v:Destroy()
+	end
+	boxes = {}
+end
+
+local function createBoxESP()
+	clearESP()
+	for _, player in ipairs(Players:GetPlayers()) do
+		if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+			local box = Instance.new("BoxHandleAdornment")
+			box.Name = "ESPBox"
+			box.Adornee = player.Character.HumanoidRootPart
+			box.AlwaysOnTop = true
+			box.ZIndex = 0
+			box.Size = Vector3.new(4, 6, 2)
+			box.Transparency = 0.2
+			box.Parent = espFolder
+			boxes[player] = box
+		end
+	end
+end
+
+-- Bật ESP
+spawn(function()
+	while espEnabled do
+		createBoxESP()
+		wait(1)
+	end
+end)
+
+-- Rainbow viền đổi màu liên tục
+spawn(function()
+	local hue = 0
+	while espEnabled do
+		hue = (hue + 0.01) % 1
+		local color = Color3.fromHSV(hue, 1, 1)
+		for _, box in pairs(boxes) do
+			if box then
+				box.Color3 = color
+			end
+		end
+		RunService.Heartbeat:Wait()
+	end
+end)			
 
 -- === Invisibility ===
 local invisConns = {}
