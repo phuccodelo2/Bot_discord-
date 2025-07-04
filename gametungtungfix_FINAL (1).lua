@@ -331,24 +331,70 @@ local function startAvoid()
 	end)
 end
 
--- Luôn cập nhật ESP nếu bật
-local function ESP_Loop()
-	while espEnabled do
-		createESP()
-		task.wait(1)
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local RunService = game:GetService("RunService")
+local Camera = workspace.CurrentCamera
+
+local espEnabled = false
+local espFolder = Instance.new("Folder", LocalPlayer:WaitForChild("PlayerGui"))
+espFolder.Name = "ESP_BOX_FOLDER"
+
+local function clearESP()
+	for _, v in ipairs(espFolder:GetChildren()) do
+		v:Destroy()
 	end
-	clearESP()
 end
 
--- Dùng biến này để bật/tắt ESP và né người
-espEnabled = true      -- đổi thành false để tắt
-
-if espEnabled then
-	spawn(ESP_Loop)
-	startAvoid()
-else
+local function createBoxESP()
 	clearESP()
+	for _, player in ipairs(Players:GetPlayers()) do
+		if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+			local box = Instance.new("BoxHandleAdornment")
+			box.Name = "ESPBox"
+			box.Adornee = player.Character.HumanoidRootPart
+			box.AlwaysOnTop = true
+			box.ZIndex = 0
+			box.Size = Vector3.new(4, 6, 2)
+			box.Color3 = Color3.fromRGB(255, 0, 0)
+			box.Transparency = 0.3
+			box.Parent = espFolder
+		end
+	end
 end
+
+-- Né đòn bay ra khi có người tới gần
+local function startAvoid()
+	spawn(function()
+		while espEnabled and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") do
+			local myHRP = LocalPlayer.Character.HumanoidRootPart
+			for _, other in ipairs(Players:GetPlayers()) do
+				if other ~= LocalPlayer and other.Character and other.Character:FindFirstChild("HumanoidRootPart") then
+					local dist = (myHRP.Position - other.Character.HumanoidRootPart.Position).Magnitude
+					if dist < 10 then
+						local dir = (myHRP.Position - other.Character.HumanoidRootPart.Position).Unit
+						local bv = Instance.new("BodyVelocity")
+						bv.Velocity = dir * 70
+						bv.MaxForce = Vector3.new(1e6, 1e6, 1e6)
+						bv.Parent = myHRP
+						game.Debris:AddItem(bv, 0.25)
+					end
+				end
+			end
+			wait(0.1)
+		end
+	end)
+end
+
+-- Bật ESP + tránh đòn
+espEnabled = true
+spawn(function()
+	while espEnabled do
+		createBoxESP()
+		wait(1)
+	end
+end)
+startAvoid()
 			
 
 -- === Invisibility ===
