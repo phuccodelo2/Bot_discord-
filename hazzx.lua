@@ -324,37 +324,7 @@ spawn(function()
 	end
 end)
 
-local Players = game:GetService("Players")
-local LocalPlayer = Players.LocalPlayer
-local RunService = game:GetService("RunService")
 
-local dodgeActive = false
-
--- Nút bật né đòn
-createButton("dodge", function(state)
-	dodgeActive = state
-end)
-
--- Theo dõi bị đánh → né ra xa
-spawn(function()
-	while true do
-		if dodgeActive and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-			local hrp = LocalPlayer.Character.HumanoidRootPart
-			for _, player in pairs(Players:GetPlayers()) do
-				if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-					local target = player.Character.HumanoidRootPart
-					local dist = (hrp.Position - target.Position).Magnitude
-					if dist < 5 then -- Bị tiếp cận gần
-						local dir = (hrp.Position - target.Position).Unit
-						hrp.Velocity = dir * 100 -- Né cực nhanh
-						wait(0.25)
-					end
-				end
-			end
-		end
-		RunService.Heartbeat:Wait()
-	end
-end)			
 
 -- === Invisibility ===
 createButton("Invisibility", function(state)
