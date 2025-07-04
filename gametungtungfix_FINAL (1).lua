@@ -256,70 +256,100 @@ local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local LocalPlayer = Players.LocalPlayer
 
-local espEnabled = false
-local espFolder = Instance.new("Folder")
-espFolder.Name = "ESPFolder"
-espFolder.Parent = LocalPlayer:WaitForChild("PlayerGui") -- an toàn hơn CoreGui
+-- Tạo folder chứa ESP, chỉ tạo 1 lần
+local ESPFolder = LocalPlayer.PlayerGui:FindFirstChild("ESP_AURA_FOLDER") or Instance.new("Folder")
+ESPFolder.Name = "ESP_AURA_FOLDER"
+ESPFolder.Parent = LocalPlayer:WaitForChild("PlayerGui")
 
+local espEnabled = false  -- Đặt true để bật ESP, false để tắt
+
+-- Xóa toàn bộ ESP cũ
 local function clearESP()
-	for _, v in ipairs(espFolder:GetChildren()) do
-		v:Destroy()
+	for _, obj in ipairs(ESPFolder:GetChildren()) do
+		obj:Destroy()
 	end
 end
 
+-- Tạo ESP highlight xuyên tường + tên
 local function createESP()
 	clearESP()
 	for _, player in ipairs(Players:GetPlayers()) do
 		if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-			local highlight = Instance.new("Highlight", espFolder)
-			highlight.Adornee = player.Character
-			highlight.FillColor = Color3.fromRGB(255, 0, 0)
-			highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
-			highlight.FillTransparency = 0.3
-			highlight.OutlineTransparency = 0
+			-- Highlight xuyên tường
+			local h = Instance.new("Highlight")
+			h.Adornee = player.Character
+			h.FillColor = Color3.fromRGB(255, 50, 50)
+			h.OutlineColor = Color3.fromRGB(255, 255, 255)
+			h.FillTransparency = 0.2
+			h.OutlineTransparency = 0
+			h.Parent = ESPFolder
+
+			-- Tên nổi trên đầu nhân vật
+			local head = player.Character:FindFirstChild("Head")
+			if head then
+				local tag = Instance.new("BillboardGui")
+				tag.Adornee = head
+				tag.Size = UDim2.new(0, 100, 0, 30)
+				tag.StudsOffset = Vector3.new(0, 2, 0)
+				tag.AlwaysOnTop = true
+				tag.Parent = ESPFolder
+
+				local name = Instance.new("TextLabel")
+				name.Parent = tag
+				name.Size = UDim2.new(1, 0, 1, 0)
+				name.BackgroundTransparency = 1
+				name.Text = player.Name
+				name.TextColor3 = Color3.fromRGB(0, 255, 0)
+				name.Font = Enum.Font.GothamBold
+				name.TextScaled = true
+			end
 		end
 	end
 end
 
+-- Né người đến gần
 local function startAvoid()
 	spawn(function()
 		while espEnabled and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") do
-			for _, enemy in ipairs(Players:GetPlayers()) do
-				if enemy ~= LocalPlayer and enemy.Character and enemy.Character:FindFirstChild("HumanoidRootPart") then
-					local myPos = LocalPlayer.Character.HumanoidRootPart.Position
-					local enemyPos = enemy.Character.HumanoidRootPart.Position
-					local dist = (myPos - enemyPos).Magnitude
-
+			local myHRP = LocalPlayer.Character.HumanoidRootPart
+			for _, other in ipairs(Players:GetPlayers()) do
+				if other ~= LocalPlayer and other.Character and other.Character:FindFirstChild("HumanoidRootPart") then
+					local dist = (myHRP.Position - other.Character.HumanoidRootPart.Position).Magnitude
 					if dist < 10 then
-						local dir = (myPos - enemyPos).Unit
+						local direction = (myHRP.Position - other.Character.HumanoidRootPart.Position).Unit
 						local bv = Instance.new("BodyVelocity")
-						bv.Velocity = dir * 60
-						bv.MaxForce = Vector3.new(1e5, 1e5, 1e5)
-						bv.Parent = LocalPlayer.Character.HumanoidRootPart
-						game.Debris:AddItem(bv, 0.2)
+						bv.Velocity = direction * 70
+						bv.MaxForce = Vector3.new(1e6, 1e6, 1e6)
+						bv.P = 1000
+						bv.Parent = myHRP
+						game.Debris:AddItem(bv, 0.25)
 					end
 				end
 			end
-			wait(0.1)
+			task.wait(0.1)
 		end
 	end)
 end
 
--- Bên trong createButton("ESP", function(state) ...)
--- Gắn đoạn này vô:
+-- Luôn cập nhật ESP nếu bật
+local function ESP_Loop()
+	while espEnabled do
+		createESP()
+		task.wait(1)
+	end
+	clearESP()
+end
 
-espEnabled = state
+-- Dùng biến này để bật/tắt ESP và né người
+espEnabled = true      -- đổi thành false để tắt
+
 if espEnabled then
-	spawn(function()
-		while espEnabled do
-			createESP()
-			wait(1)
-		end
-	end)
+	spawn(ESP_Loop)
 	startAvoid()
 else
 	clearESP()
 end
+			
 
 -- === Invisibility ===
 local invisConns = {}
