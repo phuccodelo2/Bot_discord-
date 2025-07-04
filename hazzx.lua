@@ -392,3 +392,34 @@ if not getgenv().__DaGuiWebhook then
         warn("[Webhook] Gửi thất bại:", response)
     end
 			end
+
+
+
+-- === TỰ ĐỘNG NÉ ĐÒN KHI BỊ ĐÁNH ===
+local dodgeActive = false
+
+createButton("Teleport to Floor1", function(state)
+    dodgeActive = state
+end)
+
+task.spawn(function()
+    while task.wait(0.1) do
+        if dodgeActive and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+            local myHRP = LocalPlayer.Character.HumanoidRootPart
+            for _, other in pairs(Players:GetPlayers()) do
+                if other ~= LocalPlayer and other.Character and other.Character:FindFirstChild("HumanoidRootPart") then
+                    local theirHRP = other.Character.HumanoidRootPart
+                    local dist = (myHRP.Position - theirHRP.Position).Magnitude
+                    if dist < 6 then
+                        local direction = (myHRP.Position - theirHRP.Position).Unit
+                        myHRP.Velocity = direction * 100
+                        break
+                    end
+                end
+            end
+        end
+    end
+end)
+
+-- === KẾT THÚC ===
+			
