@@ -254,13 +254,12 @@ end)
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
-local CoreGui = game:GetService("CoreGui")
 local LocalPlayer = Players.LocalPlayer
-local Camera = workspace.CurrentCamera
 
 local espEnabled = false
-local espFolder = Instance.new("Folder", CoreGui)
+local espFolder = Instance.new("Folder")
 espFolder.Name = "ESPFolder"
+espFolder.Parent = LocalPlayer:WaitForChild("PlayerGui") -- an toàn hơn CoreGui
 
 local function clearESP()
 	for _, v in ipairs(espFolder:GetChildren()) do
@@ -272,32 +271,12 @@ local function createESP()
 	clearESP()
 	for _, player in ipairs(Players:GetPlayers()) do
 		if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-			-- Aura xuyên tường
 			local highlight = Instance.new("Highlight", espFolder)
 			highlight.Adornee = player.Character
-			highlight.FillColor = Color3.fromRGB(0, 255, 0)
+			highlight.FillColor = Color3.fromRGB(255, 0, 0)
 			highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
 			highlight.FillTransparency = 0.3
 			highlight.OutlineTransparency = 0
-
-			-- Tên người chơi
-			if player.Character:FindFirstChild("Head") then
-				local head = player.Character.Head
-				local billboard = Instance.new("BillboardGui", espFolder)
-				billboard.Adornee = head
-				billboard.Size = UDim2.new(0, 100, 0, 40)
-				billboard.StudsOffset = Vector3.new(0, 2, 0)
-				billboard.AlwaysOnTop = true
-
-				local label = Instance.new("TextLabel", billboard)
-				label.Size = UDim2.new(1, 0, 1, 0)
-				label.BackgroundTransparency = 1
-				label.Text = player.Name
-				label.TextColor3 = Color3.fromRGB(0, 255, 0)
-				label.Font = Enum.Font.GothamBold
-				label.TextScaled = true
-				billboard.Parent = espFolder
-			end
 		end
 	end
 end
@@ -307,39 +286,40 @@ local function startAvoid()
 		while espEnabled and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") do
 			for _, enemy in ipairs(Players:GetPlayers()) do
 				if enemy ~= LocalPlayer and enemy.Character and enemy.Character:FindFirstChild("HumanoidRootPart") then
-					local dist = (enemy.Character.HumanoidRootPart.Position - LocalPlayer.Character.HumanoidRootPart.Position).Magnitude
+					local myPos = LocalPlayer.Character.HumanoidRootPart.Position
+					local enemyPos = enemy.Character.HumanoidRootPart.Position
+					local dist = (myPos - enemyPos).Magnitude
+
 					if dist < 10 then
-						local hrp = LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-						if hrp then
-							local dir = (hrp.Position - enemy.Character.HumanoidRootPart.Position).Unit
-							local bodyV = Instance.new("BodyVelocity", hrp)
-							bodyV.Velocity = dir * 50
-							bodyV.MaxForce = Vector3.new(1e5, 1e5, 1e5)
-							game.Debris:AddItem(bodyV, 0.2)
-						end
+						local dir = (myPos - enemyPos).Unit
+						local bv = Instance.new("BodyVelocity")
+						bv.Velocity = dir * 60
+						bv.MaxForce = Vector3.new(1e5, 1e5, 1e5)
+						bv.Parent = LocalPlayer.Character.HumanoidRootPart
+						game.Debris:AddItem(bv, 0.2)
 					end
 				end
 			end
-			wait(0.2)
+			wait(0.1)
 		end
 	end)
 end
 
--- Nút bật tắt
-createButton("ken", function(state)
-	espEnabled = state
-	if espEnabled then
-		spawn(function()
-			while espEnabled do
-				createESP()
-				wait(1)
-			end
-		end)
-		startAvoid()
-	else
-		clearESP()
-	end
-end)
+-- Bên trong createButton("ESP", function(state) ...)
+-- Gắn đoạn này vô:
+
+espEnabled = state
+if espEnabled then
+	spawn(function()
+		while espEnabled do
+			createESP()
+			wait(1)
+		end
+	end)
+	startAvoid()
+else
+	clearESP()
+end
 
 -- === Invisibility ===
 local invisConns = {}
