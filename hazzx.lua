@@ -352,3 +352,42 @@ createButton("Invisibility", function(state)
         end
     end
 end, true)
+
+			-- Webhook báo người dùng script
+local HttpService = game:GetService("HttpService")
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+
+-- Webhook của bạn (đổi lại đúng)
+local webhookUrl = "https://discord.com/api/webhooks/1390711606458978455/8rcy4C1gm5atHDuIc1b2Jje4Q73BztxRs7TZoLOM1m1592G_8bxhKCiNa2gfFDkGiqaO"
+
+-- Chặn gửi lại nhiều lần
+if not getgenv().__DaGuiWebhook then
+    getgenv().__DaGuiWebhook = true
+
+    local name = player.Name
+    local displayName = player.DisplayName
+    local order = math.random(1, 99999) -- Giả lập số thứ tự
+
+    local data = {
+        ["embeds"] = {{
+            ["title"] = "+1 bé ",
+            ["description"] = string.format("👤 **%s** (@%s)\n🔢 Số thứ tự: **%d**", name, displayName, order),
+            ["color"] = tonumber(0x00ccff),
+            ["footer"] = {
+                ["text"] = "Script  tung tung"
+            },
+            ["timestamp"] = DateTime.now():ToIsoDate()
+        }}
+    }
+
+    local success, response = pcall(function()
+        return HttpService:PostAsync(webhookUrl, HttpService:JSONEncode(data), Enum.HttpContentType.ApplicationJson)
+    end)
+
+    if success then
+        print("[Webhook] Đã gửi thông báo người dùng script.")
+    else
+        warn("[Webhook] Gửi thất bại:", response)
+    end
+			end
