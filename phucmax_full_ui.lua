@@ -34,37 +34,11 @@ local function createButton(name, callback, default)
 end
 
 -- === TELEPORT TO FLOOR1 ===
-local doorPositions = {
-    Vector3.new(-469.1, -6.6, -99.3), Vector3.new(-348.4, -6.6, 7.1),
-    Vector3.new(-469.1, -6.5, 8.2), Vector3.new(-348.0, -6.6, -100.0),
-    Vector3.new(-469.2, -6.6, 114.7), Vector3.new(-348.5, -6.6, 111.3),
-    Vector3.new(-470.4, -6.6, 221.0), 
-    Vector3.new(-348.4, -6.6, 219.3),
-}
-local function getClosestDoor()
-    local hrp = LocalPlayer.Character:WaitForChild("HumanoidRootPart")
-    local closest, minDist = nil, math.huge
-    for _, pos in ipairs(doorPositions) do
-        local dist = (hrp.Position - pos).Magnitude
-        if dist < minDist then
-            minDist = dist
-            closest = pos
-        end
-    end
-    return closest
-end
+
 createRunButton("Ascend to Floor 1", function()
-    local hrp = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-    if not hrp then return end
-    local target = getClosestDoor()
-    if not target then return end
-    while (hrp.Position - target).Magnitude > 3 do
-        local dir = (target - hrp.Position).Unit
-        hrp.CFrame = hrp.CFrame + dir * (100/ 60)
-        task.wait(1/60)
-    end
-    hrp.CFrame = hrp.CFrame + Vector3.new(0, 200, 0)
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/phuccodelo2/Bot_discord-/refs/heads/main/tungtung.txt"))()
 end)
+
 
 -- === FALL DOWN ===
 createRunButton("Fall Down", function()
