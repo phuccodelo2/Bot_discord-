@@ -35,7 +35,7 @@ local function teleportToFloor1()
 
     while (hrp.Position - target).Magnitude > 3 do
         local dir = (target - hrp.Position).Unit
-        hrp.CFrame = hrp.CFrame + dir * (100/60)
+        hrp.CFrame = hrp.CFrame + dir * (90/60)
         task.wait(1/60)
     end
 
