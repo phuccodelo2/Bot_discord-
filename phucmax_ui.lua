@@ -53,7 +53,7 @@ gui.ResetOnSpawn = false
 
 local btn = Instance.new("TextButton", gui)
 btn.Size = UDim2.new(0, 50, 0, 50)
-btn.Position = UDim2.new(0, 20, 0.5, -20)
+btn.Position = UDim2.new(0.5, -25, 0.45, 0)
 btn.BackgroundColor3 = Color3.fromRGB(0, 120, 255)
 btn.TextColor3 = Color3.new(1, 1, 1)
 btn.Text = "▶ Tele 2 "
