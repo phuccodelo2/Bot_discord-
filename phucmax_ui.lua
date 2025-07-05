@@ -37,7 +37,7 @@ local function teleportToClosest()
 
 	while teleportEnabled and (hrp.Position - target).Magnitude > 5 do
 		local dir = (target - hrp.Position).Unit
-		hrp.CFrame = hrp.CFrame + dir * (100 / 60)
+		hrp.CFrame = hrp.CFrame + dir * (90 / 60)
 		task.wait(1/60)
 	end
 
