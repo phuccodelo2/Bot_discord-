@@ -60,7 +60,7 @@ createRunButton("Ascend to Floor 1", function()
     if not target then return end
     while (hrp.Position - target).Magnitude > 3 do
         local dir = (target - hrp.Position).Unit
-        hrp.CFrame = hrp.CFrame + dir * (120/ 60)
+        hrp.CFrame = hrp.CFrame + dir * (100/ 60)
         task.wait(1/60)
     end
     hrp.CFrame = hrp.CFrame + Vector3.new(0, 200, 0)
