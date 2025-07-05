@@ -37,7 +37,7 @@ local function teleportToClosest()
 
 	while teleportEnabled and (hrp.Position - target).Magnitude > 5 do
 		local dir = (target - hrp.Position).Unit
-		hrp.CFrame = hrp.CFrame + dir * (80 / 60)
+		hrp.CFrame = hrp.CFrame + dir * (100 / 60)
 		task.wait(1/60)
 	end
 
@@ -66,12 +66,12 @@ Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 8)
 btn.MouseButton1Click:Connect(function()
 	if teleportEnabled then return end
 	teleportEnabled = true
-	btn.Text = "Đang teleport..."
+	btn.Text = "teleport"
 	btn.BackgroundColor3 = Color3.fromRGB(0, 200, 0)
 
 	teleportToClosest()
 
 	teleportEnabled = false
-	btn.Text = "stand in front of the 2nd floor door "
+	btn.Text = "teleport"
 	btn.BackgroundColor3 = Color3.fromRGB(0, 120, 255)
 end)
