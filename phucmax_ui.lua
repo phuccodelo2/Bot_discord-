@@ -52,11 +52,11 @@ gui.Name = "Teleport to Floor2"
 gui.ResetOnSpawn = false
 
 local btn = Instance.new("TextButton", gui)
-btn.Size = UDim2.new(0, 250, 0, 40)
+btn.Size = UDim2.new(0, 50, 0, 50)
 btn.Position = UDim2.new(0, 20, 0.5, -20)
 btn.BackgroundColor3 = Color3.fromRGB(0, 120, 255)
 btn.TextColor3 = Color3.new(1, 1, 1)
-btn.Text = "▶ Tele 2nd floor "
+btn.Text = "▶ Tele 2 "
 btn.Font = Enum.Font.GothamBold
 btn.TextSize = 16
 btn.Draggable = true
