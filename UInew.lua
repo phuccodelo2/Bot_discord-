@@ -29,7 +29,7 @@ toggleBtn.MouseButton1Up:Connect(function() shrink:Play() end)
 
 -- Main UI
 local main = Instance.new("Frame", screenGui)
-main.Size = UDim2.new(0, 200, 0, 280)
+main.Size = UDim2.new(0, 200, 0, 350)
 main.Position = UDim2.new(0.5, -150, 0.5, -200)
 main.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
 main.BackgroundTransparency = 0.3
