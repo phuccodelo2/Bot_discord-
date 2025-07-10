@@ -58,20 +58,18 @@ local function teleportToFloor1()
 	local basePos = getESPBase()
 	if basePos then
 		smoothMove(Vector3.new(basePos.X, hrp.Position.Y, basePos.Z))
-		task.wait(0.2)
-		char:SetPrimaryPartCFrame(CFrame.new(basePos.X, basePos.Y - 100, basePos.Z))
 	end
 end
 
 -- UI
 local gui = Instance.new("ScreenGui", CoreGui)
-gui.Name = "PhucTeleportBtn"
+gui.Name = "1"
 gui.ResetOnSpawn = false
 
 local btn = Instance.new("TextButton")
 btn.Parent = gui
-btn.Size = UDim2.new(0, 60, 0, 60)
-btn.Position = UDim2.new(0, 20, 0.5, -30)
+btn.Size = UDim2.new(0, 40, 0, 40)
+btn.Position = UDim2.new(0, 10, 0.5, -30) -- giữa bên trái
 btn.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
 btn.TextColor3 = Color3.fromRGB(0, 255, 127)
 btn.Text = "F1"
@@ -124,5 +122,5 @@ UIS.InputChanged:Connect(function(input)
 	end
 end)
 
--- Chức năng khi nhấn nút
+-- Click action
 btn.MouseButton1Click:Connect(teleportToFloor1)
