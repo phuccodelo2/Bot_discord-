@@ -51,7 +51,7 @@ status.TextXAlignment = Enum.TextXAlignment.Left
 -- Loop flag
 local running = false
 
--- Teleport to ESPBase and look at ESP_LockBase if exists
+-- Teleport to ESPBase (elevated) and face toward ESP_LockBase
 local function teleportToESPBase()
 	local char = LocalPlayer.Character
 	local hrp = char and char:FindFirstChild("HumanoidRootPart")
@@ -59,14 +59,14 @@ local function teleportToESPBase()
 	local espLock = workspace:FindFirstChild("ESP_LockBase")
 
 	if hrp and espBase then
-		local targetPos = espBase.Position - Vector3.new(0, 2, 0)
+		local elevatedPos = espBase.Position + Vector3.new(0, 10, 0)
 
 		if espLock then
-			local lookDir = (espLock.Position - targetPos).Unit
-			local cf = CFrame.new(targetPos, targetPos + lookDir)
+			local lookDir = (espLock.Position - elevatedPos).Unit
+			local cf = CFrame.new(elevatedPos, elevatedPos + lookDir)
 			hrp.CFrame = cf
 		else
-			hrp.CFrame = CFrame.new(targetPos)
+			hrp.CFrame = CFrame.new(elevatedPos)
 		end
 	end
 end
