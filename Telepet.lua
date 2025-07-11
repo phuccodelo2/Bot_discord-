@@ -45,7 +45,7 @@ status.BackgroundTransparency = 1
 status.TextColor3 = Color3.fromRGB(255, 255, 255)
 status.Font = Enum.Font.Gotham
 status.TextSize = 14
-status.Text = "Trạng thái: Đang tắt"
+status.Text = "turn off "
 status.TextXAlignment = Enum.TextXAlignment.Left
 
 -- Biến chạy loop
