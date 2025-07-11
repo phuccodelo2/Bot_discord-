@@ -2,7 +2,7 @@ local CoreGui = game:GetService("CoreGui")
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 
--- UI chính
+-- Main UI
 local gui = Instance.new("ScreenGui", CoreGui)
 gui.Name = "PhucTeleESPBaseUI"
 gui.ResetOnSpawn = false
@@ -15,7 +15,7 @@ main.Active = true
 main.Draggable = true
 Instance.new("UICorner", main).CornerRadius = UDim.new(0, 10)
 
--- Nút TELE
+-- TELEPORT BUTTON
 local teleBtn = Instance.new("TextButton", main)
 teleBtn.Size = UDim2.new(0.45, -5, 0, 40)
 teleBtn.Position = UDim2.new(0, 10, 0, 10)
@@ -26,7 +26,7 @@ teleBtn.Font = Enum.Font.GothamBold
 teleBtn.TextSize = 14
 Instance.new("UICorner", teleBtn).CornerRadius = UDim.new(0, 6)
 
--- Nút STOP
+-- STOP BUTTON
 local stopBtn = Instance.new("TextButton", main)
 stopBtn.Size = UDim2.new(0.45, -5, 0, 40)
 stopBtn.Position = UDim2.new(0.55, 0, 0, 10)
@@ -37,7 +37,7 @@ stopBtn.Font = Enum.Font.GothamBold
 stopBtn.TextSize = 14
 Instance.new("UICorner", stopBtn).CornerRadius = UDim.new(0, 6)
 
--- Label trạng thái
+-- Status label
 local status = Instance.new("TextLabel", main)
 status.Size = UDim2.new(1, -20, 0, 30)
 status.Position = UDim2.new(0, 10, 0, 60)
@@ -45,28 +45,37 @@ status.BackgroundTransparency = 1
 status.TextColor3 = Color3.fromRGB(255, 255, 255)
 status.Font = Enum.Font.Gotham
 status.TextSize = 14
-status.Text = "turn off "
+status.Text = "Status: Off"
 status.TextXAlignment = Enum.TextXAlignment.Left
 
--- Biến chạy loop
+-- Loop flag
 local running = false
 
--- Hàm Teleport tới ESPBase
+-- Teleport to ESPBase and look at ESP_LockBase if exists
 local function teleportToESPBase()
 	local char = LocalPlayer.Character
 	local hrp = char and char:FindFirstChild("HumanoidRootPart")
-	local esp = workspace:FindFirstChild("ESPBase")
+	local espBase = workspace:FindFirstChild("ESPBase")
+	local espLock = workspace:FindFirstChild("ESP_LockBase")
 
-	if hrp and esp then
-		hrp.CFrame = CFrame.new(esp.Position - Vector3.new(0, 2, 0))
+	if hrp and espBase then
+		local targetPos = espBase.Position - Vector3.new(0, 2, 0)
+
+		if espLock then
+			local lookDir = (espLock.Position - targetPos).Unit
+			local cf = CFrame.new(targetPos, targetPos + lookDir)
+			hrp.CFrame = cf
+		else
+			hrp.CFrame = CFrame.new(targetPos)
+		end
 	end
 end
 
--- Bắt đầu teleport
+-- Start teleporting
 teleBtn.MouseButton1Click:Connect(function()
 	if running then return end
 	running = true
-	status.Text = "Trạng thái: Đang TELE..."
+	status.Text = "Status: TELEPORTING..."
 
 	while running do
 		teleportToESPBase()
@@ -74,8 +83,8 @@ teleBtn.MouseButton1Click:Connect(function()
 	end
 end)
 
--- Dừng teleport
+-- Stop teleporting
 stopBtn.MouseButton1Click:Connect(function()
 	running = false
-	status.Text = "Trạng thái: Đang tắt"
+	status.Text = "Status: Stopped"
 end)
