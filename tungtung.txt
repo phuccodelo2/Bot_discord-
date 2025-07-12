@@ -30,6 +30,42 @@ end
 local function smoothMove(targetPos)
 	local hrp = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
 	if not hrp then return end
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local CoreGui = game:GetService("CoreGui")
+local TweenService = game:GetService("TweenService")
+local UIS = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+
+local workspace = game:GetService("Workspace")
+
+-- Danh sách cửa
+local doorPositions = {
+	Vector3.new(-469.1, -6.6, -99.3), Vector3.new(-348.4, -6.6, 7.1),
+	Vector3.new(-469.1, -6.5, 8.2), Vector3.new(-348.0, -6.6, -100.0),
+	Vector3.new(-469.2, -6.6, 114.7), Vector3.new(-348.5, -6.6, 111.3),
+	Vector3.new(-470.4, -6.6, 221.0), Vector3.new(-348.4, -6.6, 219.3),
+}
+
+-- Lấy cửa gần nhất
+local function getClosestDoor()
+	local hrp = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+	if not hrp then return end
+	local closest, minDist = nil, math.huge
+	for _, pos in ipairs(doorPositions) do
+		local dist = (hrp.Position - pos).Magnitude
+		if dist < minDist then
+			minDist = dist
+			closest = pos
+		end
+	end
+	return closest
+end
+
+-- Di chuyển mượt
+local function smoothMove(targetPos)
+	local hrp = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+	if not hrp then return end
 	while (hrp.Position - targetPos).Magnitude > 3 do
 		local dir = (targetPos - hrp.Position).Unit
 		hrp.CFrame = hrp.CFrame + dir * (90 / 60)
@@ -37,53 +73,95 @@ local function smoothMove(targetPos)
 	end
 end
 
+-- Lấy ESP Base (phải có part tên ESPBase trong workspace)
 local function getESPBase()
 	local base = workspace:FindFirstChild("ESPBase")
 	return base and base.Position
 end
 
+-- Lấy danh sách các ESP LOCK
+local function getESPLockList()
+	local result = {}
+	for _, v in pairs(workspace:GetChildren()) do
+		if v:IsA("Part") and v.Name == "ESP_LOCK_POINT" then
+			table.insert(result, v)
+		end
+	end
+	return result
+end
+
+-- Chức năng chính: chạy tới cửa gần nhất → nhảy lên → đi về ESP base → kiểm tra và bay ESP LOCK
+local running = false
 local function teleportToFloor1()
+	if running then return end
+	running = true
 	local char = LocalPlayer.Character
 	local hrp = char and char:FindFirstChild("HumanoidRootPart")
 	if not hrp then return end
 
+	-- B1: Di chuyển tới cửa
 	local target = getClosestDoor()
 	if not target then return end
-
 	smoothMove(target)
 	task.wait(0.1)
+
+	-- B2: Nhảy lên cao
 	hrp.CFrame = hrp.CFrame + Vector3.new(0, 200, 0)
 	task.wait(0.3)
 
+	-- B3: Di chuyển tới ESP base (nếu có)
 	local basePos = getESPBase()
 	if basePos then
 		smoothMove(Vector3.new(basePos.X, hrp.Position.Y, basePos.Z))
+
+		-- B4: Kiểm tra vùng phía dưới có base thật không
+		local found = false
+		for y = 1, 200 do
+			local down = hrp.Position - Vector3.new(0, y, 0)
+			if (down - basePos).Magnitude < 5 then
+				found = true
+				break
+			end
+		end
+
+		if found then
+			-- B5: Tele xuống sát sàn
+			hrp.CFrame = CFrame.new(Vector3.new(basePos.X, basePos.Y + 3, basePos.Z))
+			task.wait(0.2)
+
+			-- B6: Bay tới toàn bộ ESP LOCK (từ danh sách part ESP_LOCK_POINT)
+			local espLocks = getESPLockList()
+			for _, part in ipairs(espLocks) do
+				if hrp and part then
+					hrp.CFrame = part.CFrame + Vector3.new(0, 5, 0)
+					task.wait(0.1)
+				end
+			end
+		end
 	end
+	running = false
 end
 
--- UI
+-- Giao diện UI
 local gui = Instance.new("ScreenGui", CoreGui)
-gui.Name = "1"
+gui.Name = "PhucmaxQuickJump"
 gui.ResetOnSpawn = false
 
 local btn = Instance.new("TextButton")
 btn.Parent = gui
 btn.Size = UDim2.new(0, 40, 0, 40)
-btn.Position = UDim2.new(0, 10, 0.5, -30) -- giữa bên trái
+btn.Position = UDim2.new(0, 10, 0.5, -30)
 btn.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
 btn.TextColor3 = Color3.fromRGB(0, 255, 127)
 btn.Text = "1"
 btn.TextScaled = true
 btn.BorderSizePixel = 0
 btn.Font = Enum.Font.GothamBold
-
--- Viền + 7 màu
 Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 12)
 
 local stroke = Instance.new("UIStroke", btn)
 stroke.Thickness = 2
 stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-
 local gradient = Instance.new("UIGradient", stroke)
 gradient.Color = ColorSequence.new{
 	ColorSequenceKeypoint.new(0, Color3.fromRGB(255,0,0)),
@@ -100,9 +178,8 @@ task.spawn(function()
 	end
 end)
 
--- Kéo nút
-local dragging = false
-local dragStart, startPos
+-- Kéo được nút
+local dragging, dragStart, startPos = false
 btn.InputBegan:Connect(function(input)
 	if input.UserInputType == Enum.UserInputType.MouseButton1 then
 		dragging = true
@@ -122,5 +199,15 @@ UIS.InputChanged:Connect(function(input)
 	end
 end)
 
--- Click action
-btn.MouseButton1Click:Connect(teleportToFloor1)
+-- Bật tắt hoạt động
+local active = false
+btn.MouseButton1Click:Connect(function()
+	active = not active
+	if active then
+		btn.Text = "ON"
+		teleportToFloor1()
+	else
+		btn.Text = "1"
+		running = false
+	end
+end)
