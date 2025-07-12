@@ -1,4 +1,4 @@
--- NÚT 2: Bay đến cửa tầng 2 > bay đến ESPBase > bay đến ESP_LOCK_POINT
+-- NÚT 1: Bay đến cửa tầng 1 > bay đến ESPBase > bay đến ESP_LOCK_POINT
 local Players = game:GetService("Players")
 local CoreGui = game:GetService("CoreGui")
 local UIS = game:GetService("UserInputService")
@@ -7,10 +7,10 @@ local LocalPlayer = Players.LocalPlayer
 local teleportEnabled = false
 
 local doorPositions = {
-	Vector3.new(-519.3, 12.9, -134.7), Vector3.new(-519.4, 12.9, -25.7),
-	Vector3.new(-520.3, 12.9, 80.5), Vector3.new(-520.5, 12.9, 188.0),
-	Vector3.new(-299.4, 12.9, -65.5), Vector3.new(-300.7, 12.9, 145.5),
-	Vector3.new(-300.8, 12.9, 39.2), Vector3.new(-299.5, 12.9, 254.9),
+	Vector3.new(-469.1, -6.6, -99.3), Vector3.new(-348.4, -6.6, 7.1),
+	Vector3.new(-469.1, -6.5, 8.2), Vector3.new(-348.0, -6.6, -100.0),
+	Vector3.new(-469.2, -6.6, 114.7), Vector3.new(-348.5, -6.6, 111.3),
+	Vector3.new(-470.4, -6.6, 221.0), Vector3.new(-348.4, -6.6, 219.3),
 }
 
 local function getESPBase()
@@ -73,16 +73,16 @@ end
 
 -- UI nút
 local gui = Instance.new("ScreenGui", CoreGui)
-gui.Name = "Button2"
+gui.Name = "Button1"
 gui.ResetOnSpawn = false
 
 local btn = Instance.new("TextButton")
 btn.Parent = gui
 btn.Size = UDim2.new(0, 40, 0, 40)
-btn.Position = UDim2.new(0, 60, 0.5, -30)
+btn.Position = UDim2.new(0, 10, 0.5, -30)
 btn.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
 btn.TextColor3 = Color3.fromRGB(0, 255, 127)
-btn.Text = "2"
+btn.Text = "1"
 btn.TextScaled = true
 btn.Font = Enum.Font.GothamBold
 btn.BorderSizePixel = 0
@@ -128,6 +128,6 @@ btn.MouseButton1Click:Connect(function()
 	btn.BackgroundColor3 = Color3.fromRGB(0, 200, 0)
 	run()
 	teleportEnabled = false
-	btn.Text = "2"
+	btn.Text = "1"
 	btn.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
 end)
